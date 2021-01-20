@@ -24,7 +24,7 @@ test:
     - pip install -r requirements.txt
     - pip install nose2 coverage prospector
     - nose2 tests
-    - coverage run -m nose2 && coverage report -m
+    # - coverage run -m nose2 && coverage report -m
 
 test_deploy:
   stage: test_deploy
