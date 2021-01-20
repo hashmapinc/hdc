@@ -100,5 +100,4 @@ class NetezzaCrawler:
                 'default': row[7]
             }
             tables[table_name].append(column)
-        print(tables)
         return tables
