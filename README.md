@@ -43,10 +43,10 @@ pip install hashmap_data_cataloger
 Now that the environment is specified, pipeline defined, and so on, all that remains is to run the code. The code is executed from bash (or at the terminal) through
 
 ```
-python -m hashmap_data_cataloger -p {path} -s{source} -d{destination} -l {log settings} -e {env}
+python -m hdc.hashmap_data_cataloger -p {path} -s{source} -d{destination} -l {log settings} -e {env}
 
 e.g. 
-python -m hashmap_data_cataloger -p C:\Users\xxxx\.hashmap_data_migrator\hdm_profiles.yml -s netezza_jdbc -d snowflake_knerrir_schema -e dev
+python -m hdc.hashmap_data_cataloger -p C:\Users\xxxx\.hashmap_data_migrator\hdm_profiles.yml -s netezza_jdbc -d snowflake_knerrir_schema -e dev
 
 ```
 

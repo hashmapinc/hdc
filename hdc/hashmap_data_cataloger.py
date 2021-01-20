@@ -14,9 +14,10 @@
 import argparse
 import os
 import logging.config
-
+import warnings
 from hdc.catalog_driver import CatalogDriver
 from hdc.core.utils.parse_config import ParseConfig
+warnings.filterwarnings("ignore")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
