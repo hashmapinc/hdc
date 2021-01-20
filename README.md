@@ -26,13 +26,56 @@ The Hashmap Data Cataloger utility is used for data cataloging and asset mapping
 
 ## Using Hashmap Data Cataloger
 The Hashmap Data Cataloger(hdcm) can be used in two ways 
-* run from CLI 
 * as an API call
+* run from CLI 
+
 
 To use the Hashmap Data Cataloger(hdcm) you must first
 
 1. If it does not already exist in the deployment environment, create a hidden directory in the 'user' root. give any name example .hashmap_data_-cataloger
 2. Within the directory created in step 2 above, you must create a [connection profile YAML](Connection Profile YAML). This will hold the necessary connection information to connect Netezza, BigQuery and other data sources. Out of the box, at this time, there is no key management solution integrated. This is on the feature roadmap.
+
+
+#### As an API Call
+Install hashmap-data-cataloger and all of its dependencies. This is a pypi package and can be installed as
+
+```bash
+pip install hashmap_data_cataloger
+```
+
+The API has 3 methods:
+```
+  catalog - get and return a tuple of databases, schemas, tables, columns
+      params -
+            source (source connection name in profile yml file) | required
+            path (profile yml file) | required
+      retuns - 
+            data_tuple
+
+  map - generate sql queries from a tuple of databases, schemas, tables, columns returned by catalog method
+      params - 
+            data_tuple | required
+      retuns - 
+            sql_tuple
+
+  write - execute sql queries generated from map method
+      params - 
+            destination_env (destination connection name in profile yml file) | required
+            path (profile yml file) | required
+            sql_tuple | required
+      retuns - 
+            None
+```
+Call the API methods
+```
+from hdcm.factory.package_factory import PackageFactory
+
+def run_cataloging(self):
+    data_tuple = PackageFactory.catalog(source_env, path)
+    if data_tuple:
+        sql_tuple = PackageFactory.map(data_tuple)
+        PackageFactory.write(destination_env, path, sql_tuple)
+```
 
 #### Run from CLI
 Install hashmap-data-cataloger and all of its dependencies. This is a pypi package and can be installed as
@@ -57,43 +100,4 @@ The parameters are:
 * destination - destination connection name in profile yml file
 * log_settings - log settings path , default value ="log_settings.yml"
 * env - environment to take connection information , default value ="prod"
-
-#### As an API Call
-Install hashmap-data-cataloger and all of its dependencies. This is a pypi package and can be installed as
-
-```bash
-pip install hashmap_data_cataloger
-```
-
-The API has 3 methods:
-```
-* catalog - get and return a tuple of databases, schemas, tables, columns
-  params -
-        source (source connection name in profile yml file) | required
-        path (profile yml file) | required
-  retuns - 
-        data_tuple
-* map - generate sql queries from a tuple of databases, schemas, tables, columns returned by catalog method
-  params - 
-        data_tuple | required
-  retuns - 
-        sql_tuple
-* write - execute sql queries generated from map method
-  params - 
-        destination_env (destination connection name in profile yml file) | required
-        path (profile yml file) | required
-        sql_tuple | required
-  retuns - 
-        None
-```
-Call the API methods
-```
-from hdcm.factory.package_factory import PackageFactory
-
-def run_cataloging(self):
-    data_tuple = PackageFactory.catalog(source_env, path)
-    if data_tuple:
-        sql_tuple = PackageFactory.map(data_tuple)
-        PackageFactory.write(destination_env, path, sql_tuple)
-```
 

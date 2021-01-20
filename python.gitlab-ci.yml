@@ -24,7 +24,7 @@ test:
     - pip install -r requirements.txt
     - pip install nose2 coverage prospector
     - nose2 tests
-    # - coverage run -m nose2 && coverage report -m
+    - coverage run -m nose2 && coverage report -m
 
 test_deploy:
   stage: test_deploy
@@ -36,3 +36,15 @@ test_deploy:
     - twine upload --verbose -u $PYPIUN -p $PYPIPSWD --repository-url https://test.pypi.org/legacy/ dist/*
   rules:
     - if: $CI_MERGE_REQUEST_IID
+
+prod_deploy:
+  stage: prod_deploy
+  image: python:3.7.7-buster
+  script:
+    - rm -rf dist
+    - pip install twine
+    - python setup.py sdist
+    - twine upload --verbose -u $PYPIUN_PROD -p $PYPIPSWD_PROD dist/*
+  only:
+    refs:
+      - master

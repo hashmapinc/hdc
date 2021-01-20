@@ -28,28 +28,28 @@ class NetezzaCrawler:
     def run(self) -> tuple:
         try:
             with NetezzaJDBC(connection=self.__connection_choice).connection as conn:
-                databases = self.__get_database_names(conn)
+                databases = self._get_database_names(conn)
                 schemas = []
                 tables = {}
                 for db in databases:
-                    schemas.extend(self.__get_schema_names_by_db(db, conn))
-                    tables.update(self.__get_tables_by_db(db, conn))
+                    schemas.extend(self._get_schema_names_by_db(db, conn))
+                    tables.update(self._get_tables_by_db(db, conn))
                 return databases, schemas, tables
         except Exception:
             try:
                 with NetezzaODBC(connection=self.__connection_choice).connection as conn:
-                    databases = self.__get_database_names(conn)
+                    databases = self._get_database_names(conn)
                     schemas = []
                     tables = {}
                     for db in databases:
-                        schemas.extend(self.__get_schema_names_by_db(db, conn))
-                        tables.update(self.__get_tables_by_db(db, conn))
+                        schemas.extend(self._get_schema_names_by_db(db, conn))
+                        tables.update(self._get_tables_by_db(db, conn))
                     return databases, schemas, tables
             except Exception:
                 raise ValueError("Unable to connect to Netezza source. Please check if source is up. Check the configuration: %s" % self.__connection_choice)
 
     @classmethod
-    def __get_database_names(cls, conn) -> list:
+    def _get_database_names(cls, conn) -> list:
         query_string = "SELECT DATABASE FROM _V_DATABASE WHERE DATABASE <> 'SYSTEM'"
         databases = []
         cursor = conn.cursor()
@@ -61,19 +61,20 @@ class NetezzaCrawler:
         return databases
 
     @classmethod
-    def __get_schema_names_by_db(cls, database, conn) -> list:
+    def _get_schema_names_by_db(cls, database, conn) -> list:
         query_string = f"SELECT DISTINCT SCHEMA FROM {database}.._V_SCHEMA"  # WHERE OBJTYPE = 'TABLE'"
         schemas = []
 
         cursor = conn.cursor()
         cursor.execute(query_string)
         result = cursor.fetchall()
+
         for row in result:
             schemas.append(row[0])
         return schemas
 
     @classmethod
-    def __get_tables_by_db(cls, database, conn) -> dict:
+    def _get_tables_by_db(cls, database, conn) -> dict:
         query_string = f"SELECT DATABASE, SCHEMA, NAME, ATTNAME, FORMAT_TYPE, ATTLEN, ATTNOTNULL, COLDEFAULT " \
                        f"FROM {database}.._V_RELATION_COLUMN " \
                        f"WHERE DATABASE <> 'SYSTEM' AND TYPE = 'TABLE' ORDER BY SCHEMA, NAME, ATTNUM ASC"
@@ -82,6 +83,7 @@ class NetezzaCrawler:
         cursor = conn.cursor()
         cursor.execute(query_string)
         result = cursor.fetchall()
+
         for row in result:
             table_name = f"{row[0]}.{row[1]}.{row[2]}"  # ignoring name collisions across multiple db's for now
             if table_name not in tables:
@@ -98,5 +100,5 @@ class NetezzaCrawler:
                 'default': row[7]
             }
             tables[table_name].append(column)
-
+        print(tables)
         return tables
