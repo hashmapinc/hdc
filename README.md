@@ -19,7 +19,7 @@ limitations under the License.
 Table of Contents
 
 * [About](#about)
-* [Using hdcm](#using-hashmap-data-cataloger)
+* [Using hdc](#using-hashmap-data-cataloger)
 
 ## About
 The Hashmap Data Cataloger utility is used for data cataloging and asset mapping.
