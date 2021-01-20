@@ -34,5 +34,5 @@ test_deploy:
     - pip install twine
     - python setup.py sdist
     - twine upload --verbose -u $PYPIUN -p $PYPIPSWD --repository-url https://test.pypi.org/legacy/ dist/*
-  rules:
-    - if: $CI_MERGE_REQUEST_IID
+  # rules:
+  #  - if: $CI_MERGE_REQUEST_IID
