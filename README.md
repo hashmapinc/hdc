@@ -37,16 +37,16 @@ To use the Hashmap Data Cataloger(hdcm) you must first
 #### Run from CLI
 Install hashmap-data-cataloger and all of its dependencies. This is a pypi package and can be installed as
 ```bash
-pip install hashmap-data-cataloger
+pip install hashmap_data_cataloger
 ```
 
 Now that the environment is specified, pipeline defined, and so on, all that remains is to run the code. The code is executed from bash (or at the terminal) through
 
 ```
-python -m hdc.hashmap_data_cataloger -p {path} -s{source} -d{destination} -l {log settings} -e {env}
+python -m hashmap_data_cataloger -p {path} -s{source} -d{destination} -l {log settings} -e {env}
 
 e.g. 
-python -m hdc.hashmap_data_cataloger -p C:\Users\xxxx\.hashmap_data_migrator\hdm_profiles.yml -s netezza_jdbc -d snowflake_knerrir_schema -e dev
+python -m hashmap_data_cataloger -p C:\Users\xxxx\.hashmap_data_migrator\hdm_profiles.yml -s netezza_jdbc -d snowflake_knerrir_schema -e dev
 
 ```
 
@@ -62,7 +62,7 @@ The parameters are:
 Install hashmap-data-cataloger and all of its dependencies. This is a pypi package and can be installed as
 
 ```bash
-pip install hashmap-data-cataloger
+pip install hashmap_data_cataloger
 ```
 
 The API has 3 methods:
@@ -88,7 +88,7 @@ The API has 3 methods:
 ```
 Call the API methods
 ```
-from hashmap-data-cataloger.hdcm.factory.package_factory import PackageFactory
+from hdcm.factory.package_factory import PackageFactory
 
 def run_cataloging(self):
     data_tuple = PackageFactory.catalog(source_env, path)
