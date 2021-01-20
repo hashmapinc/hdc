@@ -15,6 +15,7 @@
 stages:
   - test
   - test_deploy
+  - prod_deploy
 
 test:
   stage: test
