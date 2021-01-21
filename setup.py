@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="hashmap_data_cataloger",  # Replace with your own username
-    version="0.1.0.3",
+    version="0.1.0.4",
     author="Hashmap, Inc",
     author_email="accelerators@hashmapinc.com",
     description="Early version of library - do not use",
