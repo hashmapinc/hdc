@@ -82,7 +82,7 @@ def run_cataloging(self):
 #### Run from CLI
 Install hashmap-data-cataloger and all of its dependencies. This is a pypi package and can be installed as
 ```bash
-pip install hashmap_data_cataloger
+pip install hashmap-data-cataloger
 ```
 
 Now that the environment is specified, pipeline defined, and so on, all that remains is to run the code. The code is executed from bash (or at the terminal) through
