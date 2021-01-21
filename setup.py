@@ -4,8 +4,8 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="hashmap-data-cataloger",  # Replace with your own username
-    version="0.1.0.4",
+    name="hashmap_data_cataloger",  # Replace with your own username
+    version="0.1.0.5",
     author="Hashmap, Inc",
     author_email="accelerators@hashmapinc.com",
     description="Early version of library - do not use",
