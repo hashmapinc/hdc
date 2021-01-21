@@ -71,6 +71,8 @@ Call the API methods
 from hdcm.factory.package_factory import PackageFactory
 
 def run_cataloging(self):
+    source_env = "netezza_jdbc"
+    destination_env = "snowflake_admin_schema"
     data_tuple = PackageFactory.catalog(source_env, path)
     if data_tuple:
         sql_tuple = PackageFactory.map(data_tuple)
@@ -89,7 +91,7 @@ Now that the environment is specified, pipeline defined, and so on, all that rem
 python -m hdc.hashmap_data_cataloger -p {path} -s{source} -d{destination} -l {log settings} -e {env}
 
 e.g. 
-python -m hdc.hashmap_data_cataloger -p C:\Users\xxxx\.hashmap_data_migrator\hdm_profiles.yml -s netezza_jdbc -d snowflake_knerrir_schema -e dev
+python -m hdc.hashmap_data_cataloger -p C:\Users\xxxx\.hashmap_data_migrator\hdm_profiles.yml -s netezza_jdbc -d snowflake_admin_schema -e dev
 
 ```
 
@@ -103,7 +105,7 @@ The parameters are:
 
 ## Connection Profile YAML
 
-This files stores the connection information to the source.
+This files stores the connection information to the source and destination.
 Its stored in local FS and its path is set in environment variable "HOME".
 ```yaml
 dev:
@@ -123,5 +125,14 @@ dev:
     user: <user_name>
     password: <password>
     driver: <driver_name>
+  snowflake_admin_schema:
+    authenticator: snowflake
+    account: <account>
+    role: <role>
+    warehouse: <warehouse_name>
+    database: <database_name>
+    schema: <schema_name>
+    user: <user_name>
+    password: <password>
 ```
 
