@@ -33,7 +33,7 @@ The Hashmap Data Cataloger(hdcm) can be used in two ways
 To use the Hashmap Data Cataloger(hdcm) you must first
 
 1. If it does not already exist in the deployment environment, create a hidden directory in the 'user' root. give any name example .hashmap_data_-cataloger
-2. Within the directory created in step 2 above, you must create a [connection profile YAML](Connection Profile YAML). This will hold the necessary connection information to connect Netezza, BigQuery and other data sources. Out of the box, at this time, there is no key management solution integrated. This is on the feature roadmap.
+2. Within the directory created in step 2 above, you must create a [connection profile YAML](#connection-profile-yaml). This will hold the necessary connection information to connect Netezza, BigQuery and other data sources. Out of the box, at this time, there is no key management solution integrated. This is on the feature roadmap.
 
 
 #### As an API Call
@@ -71,6 +71,8 @@ Call the API methods
 from hdcm.factory.package_factory import PackageFactory
 
 def run_cataloging(self):
+    source_env = "netezza_jdbc"
+    destination_env = "snowflake_admin_schema"
     data_tuple = PackageFactory.catalog(source_env, path)
     if data_tuple:
         sql_tuple = PackageFactory.map(data_tuple)
@@ -89,7 +91,7 @@ Now that the environment is specified, pipeline defined, and so on, all that rem
 python -m hdc.hashmap_data_cataloger -p {path} -s{source} -d{destination} -l {log settings} -e {env}
 
 e.g. 
-python -m hdc.hashmap_data_cataloger -p C:\Users\xxxx\.hashmap_data_migrator\hdm_profiles.yml -s netezza_jdbc -d snowflake_knerrir_schema -e dev
+python -m hdc.hashmap_data_cataloger -p C:\Users\xxxx\.hashmap_data_migrator\hdm_profiles.yml -s netezza_jdbc -d snowflake_admin_schema -e dev
 
 ```
 
@@ -100,4 +102,37 @@ The parameters are:
 * destination - destination connection name in profile yml file
 * log_settings - log settings path , default value ="log_settings.yml"
 * env - environment to take connection information , default value ="prod"
+
+## Connection Profile YAML
+
+This files stores the connection information to the source and destination.
+Its stored in local FS and its path is set in environment variable "HOME".
+```yaml
+dev:
+  netezza_jdbc:  * Note:Add this section if using JDBC driver
+    host: <host>
+    port: <port>
+    database: <database_name>
+    user: <user_name>
+    password: <password>
+    driver:
+      name: <driver_name>
+      path: <driver_path>
+  netezza_odbc:  * Note:Add this section if using ODBC driver
+    host: <host>
+    port: <port>
+    database: <database_name>
+    user: <user_name>
+    password: <password>
+    driver: <driver_name>
+  snowflake_admin_schema:
+    authenticator: snowflake
+    account: <account>
+    role: <role>
+    warehouse: <warehouse_name>
+    database: <database_name>
+    schema: <schema_name>
+    user: <user_name>
+    password: <password>
+```
 
