@@ -40,7 +40,7 @@ To use the Hashmap Data Cataloger(hdcm) you must first
 Install hashmap-data-cataloger and all of its dependencies. This is a pypi package and can be installed as
 
 ```bash
-pip install hashmap_data_cataloger
+pip install hashmap-data-cataloger
 ```
 
 The API has 3 methods:
