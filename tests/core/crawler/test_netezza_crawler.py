@@ -12,9 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import unittest
 from unittest import TestCase
 from unittest.mock import Mock
-from hdc.core.catalog.crawler.netezza_crawler import NetezzaCrawler
+
+from hdc.core.catalog.netezza_crawler import NetezzaCrawler
 
 
 class TestNetezzaCrawler(TestCase):
@@ -63,3 +65,6 @@ class TestNetezzaCrawler(TestCase):
         execute.fetchall.return_value = mock_db_result
 
         self.assertEqual(NetezzaCrawler._get_tables_by_db('TEST', self._mock), expected_response)
+
+if __name__ == '__main__':
+    unittest.main()

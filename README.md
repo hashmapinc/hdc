@@ -18,121 +18,152 @@ limitations under the License.
 
 Table of Contents
 
-* [About](#about)
-* [Using hdc](#using-hashmap-data-cataloger)
+- [About](#about)
+- [Using Hashmap Data Cataloger (hdc)](#Using-hashmap-data-cataloger)
+    - [Setup](#Setup)
+    - [Running from CLI](#Running-from-CLI)
+    - [Using as API](#Using-as-API)  
+- [Future Roadmap](#Future-Roadmap)
+- [Notes to developers](#Notes-to-developers)
 
 ## About
-The Hashmap Data Cataloger utility is used for data cataloging and asset mapping.
+
+The Hashmap Data Cataloger utility that can be used to catalog(read) data assets such as Databases, Schemas, and Tables
+from a given source system and map(write) them into a given destination system. 
+
 
 ## Using Hashmap Data Cataloger
-The Hashmap Data Cataloger(hdcm) can be used in two ways 
-* as an API call
-* run from CLI 
 
+hashmap-data-cataloger (hdc) is can be invoked from the command line interface (next section) or as a library of APIs.
 
-To use the Hashmap Data Cataloger(hdcm) you must first
+### Setup
 
-1. If it does not already exist in the deployment environment, create a hidden directory in the 'user' root. give any name example .hashmap_data_-cataloger
-2. Within the directory created in step 2 above, you must create a [connection profile YAML](#connection-profile-yaml). This will hold the necessary connection information to connect Netezza, BigQuery and other data sources. Out of the box, at this time, there is no key management solution integrated. This is on the feature roadmap.
-
-
-#### As an API Call
-Install hashmap-data-cataloger and all of its dependencies. This is a pypi package and can be installed as
+#### Package Installation 
+   
+This tool is available on PyPi and can be installed as:
 
 ```bash
 pip install hashmap-data-cataloger
 ```
+    
+This will install the hashmap-data-cataloger and all of its dependencies. This is a pypi package and can be installed as
 
-The API has 3 methods:
-```
-  catalog - get and return a tuple of databases, schemas, tables, columns
-      params -
-            source (source connection name in profile yml file) | required
-            path (profile yml file) | required
-      retuns - 
-            data_tuple
 
-  map - generate sql queries from a tuple of databases, schemas, tables, columns returned by catalog method
-      params - 
-            data_tuple | required
-      retuns - 
-            sql_tuple
+#### Connection configuration file setup
 
-  write - execute sql queries generated from map method
-      params - 
-            destination_env (destination connection name in profile yml file) | required
-            path (profile yml file) | required
-            sql_tuple | required
-      retuns - 
-            None
-```
-Call the API methods
-```
-from hdcm.factory.package_factory import PackageFactory
+The hdc tool is a configuration driven application that depends on 3 types of configurations encoded as [YAML](https://yaml.org/).
 
-def run_cataloging(self):
-    source_env = "netezza_jdbc"
-    destination_env = "snowflake_admin_schema"
-    data_tuple = PackageFactory.catalog(source_env, path)
-    if data_tuple:
-        sql_tuple = PackageFactory.map(data_tuple)
-        PackageFactory.write(destination_env, path, sql_tuple)
-```
+##### Application Configuration
 
-#### Run from CLI
-Install hashmap-data-cataloger and all of its dependencies. This is a pypi package and can be installed as
+The hdc tool uses this YAML file to configure the 3 primary helper objects that enable the API functions 'map' or 'cataog'.
+The elements required in the YAML file and their layout looks like [this](resources/app_config.yml).
+
+You can override this file from CLI using the '-c' option followed by the path of the custom YAML file. 
+However, it must conform to the format linked above.
+
+To create a default YAML configuration file do the following:
+
+1. Using any text editor create a file like [this](resources/app_config.yml) and save as 'app_config.yml'
+2. Create a hidden directory in the User's root with the name '.hdc'
+3. Move the 'app_config.yml' into the hidden directory created above. 
+
+
+
+##### Connection Profile Configuration
+
+The hdc tool uses this YAML file to configure/provide the necessary connection details for source and destination databases.
+The elements required in the YAML file and their layout looks like [this](resources/profile.yml).
+Presently, the connections are secured via user credentials.
+
+You __cannot__ override this file from CLI and therefore will need to be made available beforehand as follows:
+
+1. Using any text editor create a file like [this](resources/profile.yml) and save as 'profile.yml'
+2. Create a hidden directory in the User's root with the name '.hdc'
+3. Move the 'profile.yml' into the hidden directory created above. 
+
+
+##### Log Settings Configuration
+
+The hdc tool uses this YAML file to configure the log settings (Python's logging).
+The elements required in the YAML file and their layout looks like [this](resources/log_settings.yml).
+
+You can override this file from CLI using the '-l' option followed by the path of the custom YAML file. 
+However, it must conform to the format linked above.
+
+To create a default YAML configuration file do the following:
+
+1. Using any text editor create a file like [this](resources/log_settings.yml) and save as 'log_settings.yml'
+2. Create a hidden directory in the User's root with the name '.hdc'
+3. Move the 'log_settings.yml' into the hidden directory created above. 
+
+
+###  Running from CLI
+Once the package is installed along-with its dependencies, invoke it from the command line as:
+
 ```bash
-pip install hashmap-data-cataloger
+usage: hdc [-h] [-c APP_CONFIG] [-l LOG_SETTINGS] -r {catalog,map} -s SOURCE
+           [-d DESTINATION] [-m MAPPER]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -c APP_CONFIG, --app_config APP_CONFIG
+                        Path to application config (YAML) file if other than default
+  -l LOG_SETTINGS, --log_settings LOG_SETTINGS
+                        Path to log settings (YAML) file if other than default
+  -r {catalog,map}, --run {catalog,map}
+                        One of 'catalog' or 'map'
+  -s SOURCE, --source SOURCE
+                        Name of any one of crawlers configured in app_config.yml
+  -d DESTINATION, --destination DESTINATION
+                        Name of any one of creators configured in app_config.yml
+  -m MAPPER, --mapper MAPPER
+                        Name of any one of mappers configured in app_config.yml
 ```
 
-Now that the environment is specified, pipeline defined, and so on, all that remains is to run the code. The code is executed from bash (or at the terminal) through
+### Using as API 
 
-```
-python -m hdc.hashmap_data_cataloger -p {path} -s{source} -d{destination} -l {log settings} -e {env}
+Other applications could import hdc as a library and make use of the cataloging or mapping functions as explained below.
 
-e.g. 
-python -m hdc.hashmap_data_cataloger -p C:\Users\xxxx\.hashmap_data_migrator\hdm_profiles.yml -s netezza_jdbc -d snowflake_admin_schema -e dev
+   > 1. __AssetMapper.map_assets()__ - Map the data assets from a source system to a target system. 
+                                  AssetMapper class requires 3 keyword arguments -'source', 'destination', and 'mapper'
+                                  which are names configured under 'crawlers', 'creators', and 'mappers' resp,
+                                  in the app_config.yml file. 
+                                  For more information, get help on *hdc.core.asset_mapper.AssetMapper* class
+   >                               
+   > 2. __Cataloger.obtain_catalog()__ - Crawls a given source system and pulls the data asset information to return as a tuple.
+                                   Cataloger class requires 1 keyword argument -'source', 
+                                   which is the name of a configured 'crawlers' in the app_config.yml file. 
+                                   For more information, get help on *hdc.core.cataloger.Cataloger* class
+           
+                                     
 
-```
+## Future Roadmap
 
-The parameters are:
+### Using external Key Store 
 
-* path - profile yml file 
-* source - source connection name in profile yml file
-* destination - destination connection name in profile yml file
-* log_settings - log settings path , default value ="log_settings.yml"
-* env - environment to take connection information , default value ="prod"
+#### For enhanced user authentication 
 
-## Connection Profile YAML
+Allow configuration of external Key Stores for storing user authentication details required while connecting with source or destination systems. 
+The application shall be able to interact with the external KS based on the configuration provided. 
 
-This files stores the connection information to the source and destination.
-Its stored in local FS and its path is set in environment variable "HOME".
-```yaml
-dev:
-  netezza_jdbc:  * Note:Add this section if using JDBC driver
-    host: <host>
-    port: <port>
-    database: <database_name>
-    user: <user_name>
-    password: <password>
-    driver:
-      name: <driver_name>
-      path: <driver_path>
-  netezza_odbc:  * Note:Add this section if using ODBC driver
-    host: <host>
-    port: <port>
-    database: <database_name>
-    user: <user_name>
-    password: <password>
-    driver: <driver_name>
-  snowflake_admin_schema:
-    authenticator: snowflake
-    account: <account>
-    role: <role>
-    warehouse: <warehouse_name>
-    database: <database_name>
-    schema: <schema_name>
-    user: <user_name>
-    password: <password>
-```
+This is to provide a stronger security option instead of directly configuring the user credentials in the profile.yml file. 
 
+
+## Notes to developers
+
+### OOP Design
+[UML Class Diagram](https://lucid.app/lucidchart/invitations/accept/357e8f4a-b943-4fbe-a488-57d75342a17b)
+
+### Extending capability
+
+#### Adding new crawler
+
+TBD
+
+#### Adding new mapper
+
+TBD
+
+#### Adding new creator
+
+TBD

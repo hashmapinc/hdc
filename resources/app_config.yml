@@ -1,0 +1,27 @@
+---
+# Section 1: Crawler(s) settings
+crawlers:
+  netezza_1:
+    class_type: NetezzaCrawler
+    dao_conf:
+      class_type: NetezzaJDBC
+      conn_profile_name: netezza_jdbc #Must match a named connection profile in the profile.yml file
+  netezza_2:
+    class_type: NetezzaCrawler
+    dao_conf:
+      class_type: NetezzaODBC
+      conn_profile_name: netezza_odbc
+
+# Section 2: Creator(s) settings
+creators:
+  snowflake_1:
+    class_type: SnowflakeCreator
+    dao_conf:
+      class_type: Snowflake
+      conn_profile_name: snowflake_admin_schema #Must match a named connection profile in the profile.yml file
+
+# Section 3: Mapper(s) settings
+mappers:
+  netezza_to_snowflake:
+    class_type: NetezzaToSnowflakeMapper
+...

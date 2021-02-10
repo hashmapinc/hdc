@@ -1,0 +1,25 @@
+netezza_jdbc:  * Note:Add this section if using JDBC driver
+  host: <host>
+  port: <port>
+  database: <database_name>
+  user: <user_name>
+  password: <password>
+  driver:
+    name: <driver_name>
+    path: <driver_path>
+netezza_odbc:  * Note:Add this section if using ODBC driver
+  host: <host>
+  port: <port>
+  database: <database_name>
+  user: <user_name>
+  password: <password>
+  driver: <driver_name>
+snowflake_admin_schema:
+  authenticator: snowflake
+  account: <account>
+  role: <role>
+  warehouse: <warehouse_name>
+  database: <database_name>
+  schema: <schema_name>
+  user: <user_name>
+  password: <password>

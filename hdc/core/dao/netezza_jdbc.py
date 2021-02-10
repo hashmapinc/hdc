@@ -11,21 +11,22 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import jaydebeapi as connector
-import yaml
+"""
+# TODO : Module description
+"""
+import jaydebeapi
 
 from hdc.core.dao.netezza import Netezza
-from hdc.core.utils.project_config import ProjectConfig
+from hdc.utils.file_parsers import yaml_parser
 
 
 class NetezzaJDBC(Netezza):
 
-    def _validate_configuration(self) -> bool:
-        with open(f"{ProjectConfig.profile_path()}", 'r') as stream:
-            conn_conf = yaml.safe_load(stream)[ProjectConfig.hdc_env()][self._connection_name]
+    def _validate_configuration(self, required_keys) -> bool:
+        is_valid = super().__validate_configuration(required_keys)
 
-        required_keys = ['host', 'port', 'database', 'user', 'password', 'driver']
-        is_valid = all([key in conn_conf.keys() for key in required_keys])
+        profile_yaml = yaml_parser(yaml_file_path=self._get_profile_path())
+        conn_conf = profile_yaml[self._connection_name]
 
         if is_valid:
             required_keys = ['name', 'path']
@@ -33,18 +34,19 @@ class NetezzaJDBC(Netezza):
 
         return is_valid
 
-    def _get_connection_config(self, config: dict):
+    def __build_connection_string(self, config: dict):
         return dict(driver_name=config['driver']['name'],
                     driver_location=config['driver']['path'],
                     connection_string=f"jdbc:netezza://{config['host']}:{config['port']}/{config['database']}",
                     user=config['user'],
                     password=config['password'])
 
-    def _connect_by_connector(self, config: dict) -> None:
-        return connector.connect(config['driver_name'],
-                                 config['connection_string'],
+    def __attempt_to_connect(self, conn_conf):
+        jdbc_compliant_config = self.__build_connection_string(conn_conf)
+        return jaydebeapi.connect(jdbc_compliant_config['driver_name'],
+                                 jdbc_compliant_config['connection_string'],
                                  {
-                                     'user': config['user'],
-                                     'password': config['password']
+                                     'user': jdbc_compliant_config['user'],
+                                     'password': jdbc_compliant_config['password']
                                  },
-                                 jars=config['driver_location'])
+                                 jars=jdbc_compliant_config['driver_location'])

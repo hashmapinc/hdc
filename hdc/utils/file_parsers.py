@@ -11,20 +11,21 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""
+
+"""
+
 import os
+
 import yaml
 
 
-class ParseConfig:
-
-    @classmethod
-    def parse(cls, config_path):
-
-        with open(config_path, 'r') as stream:
-            config = yaml.safe_load(
-                os.path.expandvars(
-                    stream.read()
-                )
+def yaml_parser(yaml_file_path):
+    with open(yaml_file_path, 'r') as stream:
+        config = yaml.safe_load(
+            os.path.expandvars(
+                stream.read()
             )
+        )
 
-        return config
+    return config
