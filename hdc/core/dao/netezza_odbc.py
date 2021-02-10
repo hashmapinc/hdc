@@ -11,33 +11,24 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import pyodbc
-import yaml
+"""
+# TODO: Module description
+"""
+
+#import pyodbc
 
 from hdc.core.dao.netezza import Netezza
-from hdc.core.utils.project_config import ProjectConfig
 
 
 class NetezzaODBC(Netezza):
 
-    def _validate_configuration(self) -> bool:
-        with open(f"{ProjectConfig.profile_path()}", 'r') as stream:
-            conn_conf = yaml.safe_load(stream)[ProjectConfig.hdc_env()][self._connection_name]
-
-        required_keys = ['user', 'password', 'host', 'port', 'database', 'driver']
-        is_valid = all([key in conn_conf.keys() for key in required_keys])
-        """
-        if is_valid:
-            required_keys = ['connection_string']
-            return all([key in conn_conf['driver'].keys() for key in required_keys])
-        """
-        return is_valid
-
-    def _get_connection_config(self, config: dict) -> dict:
+    def __build_connection_string(self, config: dict) -> dict:
         return dict(driver=config['driver'],
                     connection_string=f"DRIVER={config['driver']};SERVER={config['host']};"
                                       f"PORT={config['port']};DATABASE={config['database']};"
                                       f"UID={config['user']};PWD={config['password']};")
 
-    def _connect_by_connector(self, config: dict) -> None:
-        return pyodbc.connect(config['connection_string'])
+    def __attempt_to_connect(self, conn_conf):
+        # odbc_compliant_config = self.__build_connection_string(conn_conf)
+        # return pyodbc.connect(odbc_compliant_config['connection_string'])
+        pass

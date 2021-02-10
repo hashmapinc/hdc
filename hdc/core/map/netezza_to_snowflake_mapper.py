@@ -13,27 +13,30 @@
 # limitations under the License.
 import logging
 
+from hdc.core.map.mapper import Mapper
 
-class NetezzaToSnowflakeMapper:
+
+class NetezzaToSnowflakeMapper(Mapper):
+
     @classmethod
     def _get_logger(cls):
         return logging.getLogger(cls.__name__)
 
     def __init__(self, **kwargs):
         self._logger = self._get_logger()
-        self.__databases = kwargs['databases']
-        self.__schemas = kwargs['schemas']
-        self.__tables = kwargs['tables']
+        # self.__databases = kwargs['databases']
+        # self.__schemas = kwargs['schemas']
+        # self.__tables = kwargs['tables']
     
-    def __map_databases(self) -> list:
+    def __map_databases(self, databases) -> list:
         result = []
-        for database in self.__databases:
+        for database in databases:
             result.append(f"CREATE DATABASE IF NOT EXISTS {database}")
         return result
 
-    def __map_schemas(self) -> list:
+    def __map_schemas(self, schemas) -> list:
         result = []
-        for schema in self.__schemas:
+        for schema in schemas:
             result.append(f"CREATE SCHEMA IF NOT EXISTS {schema}")
         return result
 
@@ -45,10 +48,10 @@ class NetezzaToSnowflakeMapper:
         result = result.replace("TIME WITH TIME ZONE", "TIMESTAMP_TZ")
         return result
 
-    def __map_tables(self) -> list:
+    def __map_tables(self, tables) -> list:
         result = []
         mapped_columns = {}
-        for table, columnList in self.__tables.items():
+        for table, columnList in tables.items():
             if table not in mapped_columns:
                 mapped_columns[table] = []
             for column in columnList:
@@ -68,9 +71,9 @@ class NetezzaToSnowflakeMapper:
         
         return result
     
-    def map(self) -> tuple:
-        database_sql = self.__map_databases()
-        schema_sql = self.__map_schemas()
-        table_sql = self.__map_tables()
+    def run(self, databases, schemas, tables) -> tuple:
+        database_sql = self.__map_databases(databases)
+        schema_sql = self.__map_schemas(schemas)
+        table_sql = self.__map_tables(tables)
         
         return database_sql, schema_sql, table_sql

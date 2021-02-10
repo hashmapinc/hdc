@@ -11,31 +11,18 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""
+# TODO: Module description
+"""
+
 import logging
-from contextlib import contextmanager
 
 
 class DAO:
-    @classmethod
-    def _get_logger(cls):
-        return logging.getLogger(cls.__name__)
 
     def __init__(self, **kwargs):
-        self._logger = self._get_logger()
-        self._connection_name = kwargs.get('connection')
-        if not self._validate_configuration():
-            raise ConnectionError(f'Missing Configuration key for {type(self).__name__}. Please check profile.yml file. '
-                                  f'The list of required keys can be found in dao/{type(self).__name__}.py in _validate_configuration method.')
+        self.__logger = self.__get_logger()
 
-    @property
-    def connection(self):
-        return self._get_connection()
-
-    def _get_connection(self):
-        raise NotImplementedError(f'Method not implemented for {type(self).__name__}.')
-
-    def _test_connection(self, connection) -> bool:
-        raise NotImplementedError(f'Method not implemented for {type(self).__name__}.')
-
-    def _validate_configuration(self) -> bool:
-        raise NotImplementedError(f'Method not implemented for {type(self).__name__}.')
+    @classmethod
+    def __get_logger(cls):
+        return logging.getLogger(cls.__name__)
