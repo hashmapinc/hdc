@@ -19,6 +19,7 @@ from providah.factories.package_factory import PackageFactory as providah_pkg_fa
 from hdc.core.catalog.crawler import Crawler
 from hdc.core.create.creator import Creator
 from hdc.core.map.mapper import Mapper
+from hdc.utils.misc import get_app_config
 
 
 class AssetMapper:
@@ -26,31 +27,37 @@ class AssetMapper:
     def __init__(self, **kwargs):
         source = kwargs.get('source')
         destination = kwargs.get('destination')
-        mapper = kwargs.get('mapper')
+        app_config = get_app_config(kwargs.get('app_config', None))
 
-        self._crawler: Crawler = providah_pkg_factory.create(key=source['class_type'],
-                                                             configuration={'dao_conf': source['dao_conf']})
+        self._crawler: Crawler = providah_pkg_factory.create(key=app_config['sources'][source]['class_name'],
+                                                             configuration={'dao_conf': {
+                                                                 'class_name': app_config['sources'][source]['dao'],
+                                                                 'conn_profile_name': app_config['connection_profiles'][
+                                                                     source]
+                                                             }})
 
-        self._mapper: Mapper = providah_pkg_factory.create(key=mapper['class_type'])
+        self._mapper: Mapper = providah_pkg_factory.create(key=app_config['mappers'][source][destination])
 
-        self._creator: Creator = providah_pkg_factory.create(key=destination['class_type'],
-                                                             configuration={'dao_conf': destination['dao_conf']})
+        self._creator: Creator = providah_pkg_factory.create(key=app_config['destinations'][destination]['class_name'],
+                                                             configuration={'dao_conf':
+                                                                 {
+                                                                     'class_name':
+                                                                         app_config['destinations'][destination][
+                                                                             'dao'],
+                                                                     'conn_profile_name':
+                                                                         app_config['connection_profiles'][
+                                                                             destination]
+                                                                 }})
 
     def map_assets(self) -> bool:
-        """
-
-        :return:
-        """
-        success = True
+        success = False
         try:
-            data_tuple = self._crawler.run()
-            if data_tuple:
-                database_sql, schema_sql, table_sql =  self._mapper.run(databases=data_tuple[0], schemas=data_tuple[1], tables=data_tuple[2])
-                self._creator.run(database_sql, schema_sql, table_sql)
-        except Exception:
+            catalog_dataframe = self._crawler.obtain_catalog()
+            if catalog_dataframe is not None:
+                sql_ddl_list = self._mapper.map_assets(catalog_dataframe)
+                self._creator.replicate_structures(sql_ddl_list)
+                success = True
+        except Exception as e:
+            raise e
             success = False
-
         return success
-
-
-

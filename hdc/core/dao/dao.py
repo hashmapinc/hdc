@@ -21,8 +21,7 @@ import logging
 class DAO:
 
     def __init__(self, **kwargs):
-        self.__logger = self.__get_logger()
+        self.__logger = self._get_logger()
 
-    @classmethod
-    def __get_logger(cls):
-        return logging.getLogger(cls.__name__)
+    def _get_logger(self):
+        return logging.getLogger(".".join([class_type.__name__ for class_type in self.__class__.mro()[-2::-1]]))

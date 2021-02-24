@@ -12,31 +12,47 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 """
-#TODO: Module description
+# TODO: Module description
 """
-from pandas import DataFrame
 
-from hdc.core.catalog.crawler import Crawler
+import pandas as pd
+
+from hdc.core.create.creator import Creator
 
 
-class RdbmsCrawler(Crawler):
+class RdbmsCreator(Creator):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.__logger = self._get_logger()
 
-    def obtain_catalog(self) -> DataFrame:
+    def replicate_structures(self, database_sql, schema_sql, table_sql):
         raise NotImplementedError(f'Method not implemented for {type(self).__name__}.')
 
-    def _fetch_all(self, dao, query_string) -> DataFrame:
+    def _fetch_all(self, dao, query_string, column_map) -> pd.DataFrame:
         with dao.get_connection() as conn:
             if conn is not None:
                 cursor = conn.cursor()
-                self.__logger.debug(f"Fetching data for query {query_string}")
                 cursor.execute(query_string)
-                columns = cursor.description
-                result_set = [{columns[row_index][0]: value for row_index, value in enumerate(record)} for record in
-                              cursor.fetchall()]
-                return DataFrame(result_set)
+                df = cursor.fetch_pandas_all()
+                df.columns = list(column_map.keys())
+                return df
             else:
                 return None
+
+    def _stream_result_set(self, dao, query_string) -> pd.DataFrame:
+        with dao.get_connection() as conn:
+            if conn is not None:
+                cursor = conn.cursor()
+                cursor.execute(query_string)
+                for df in cursor.fetch_pandas_batches():
+                    yield df
+            else:
+                return None
+
+    def _execute_update(self, dao, query_list):
+        with dao.get_connection() as conn:
+            if conn is not None:
+                cursor = conn.cursor()
+                for sql in query_list:
+                    cursor.execute(sql)

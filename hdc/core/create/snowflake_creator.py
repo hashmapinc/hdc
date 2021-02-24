@@ -19,41 +19,18 @@ import logging
 
 from providah.factories.package_factory import PackageFactory as providah_pkg_factory
 
-from hdc.core.create.rdbc_creator import RdbmsCreator
+from hdc.core.create.rdbms_creator import RdbmsCreator
+from hdc.core.dao.rdbms_dao import RdbmsDAO
 
 
 class SnowflakeCreator(RdbmsCreator):
 
-    @classmethod
-    def __get_logger(cls):
-        return logging.getLogger(cls.__name__)
-
     def __init__(self, **kwargs):
-        self.__logger = self.__get_logger()
-        self.__dao_conf = kwargs['dao_conf']
+        super().__init__(**kwargs)
+        self.__logger = self._get_logger()
+        self.__dao_conf = kwargs.get('dao_conf')
 
-    def run(self, sql_list, database_sql, schema_sql, table_sql):
-        try:
-            connector = providah_pkg_factory.create(key=self.__dao_conf['class_type'],
+    def replicate_structures(self, sql_list):
+        dao: RdbmsDAO = providah_pkg_factory.create(key=self.__dao_conf['class_name'],
                                                     configuration={'connection': self.__dao_conf['conn_profile_name']})
-
-            # Skip creating databases for now
-
-            # Create the Schema(s) in the target system
-            self.__execute_sql(connector, schema_sql)
-
-            # Create the tables in the target system
-            self.__execute_sql(connector, table_sql)
-
-        except:
-            raise ValueError(
-                "Unable to connect to Snowflake. Please check if source is up. Check the configuration: %s" % self._connection_name)
-
-
-    def __execute_sql(self, connector, sql_list):
-        with connector.connection as conn:
-            cursor = conn.cursor()
-            for sql in sql_list:
-                self.__logger.info("executing SQL: %s", sql)
-                cursor.execute(sql)
-
+        self._execute_update(dao, sql_list)
