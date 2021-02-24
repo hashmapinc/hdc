@@ -1,25 +1,72 @@
-netezza_jdbc:  * Note:Add this section if using JDBC driver
+netezza_jdbc:
+  protocol: jdbc
+  host: <hostname>
+  port: <port>
+  database: <database to connect to>
+  user: <user name>
+  password: <password>
+  driver:
+    name: <java class name>
+    path: <driver jar location>
+
+netezza_odbc:
+  protocol: odbc
   host: <host>
   port: <port>
   database: <database_name>
   user: <user_name>
   password: <password>
   driver:
-    name: <driver_name>
-    path: <driver_path>
-netezza_odbc:  * Note:Add this section if using ODBC driver
+    name: <ODBC Driver Name>
+
+oracle_jdbc_with_sid:
+  protocol: jdbc
   host: <host>
   port: <port>
-  database: <database_name>
+  sid: <Oracle instance identifier>
   user: <user_name>
   password: <password>
-  driver: <driver_name>
-snowflake_admin_schema:
-  authenticator: snowflake
-  account: <account>
-  role: <role>
-  warehouse: <warehouse_name>
-  database: <database_name>
-  schema: <schema_name>
+  driver:
+    name: <java class name>
+    path: <driver jar location>
+
+oracle_jdbc_with_service_name:
+  protocol: odbc
+  host: <host>
+  port: <port>
+  service_name: <Oracle instance identifier>
   user: <user_name>
   password: <password>
+  driver:
+    name: <java class name>
+    path: <driver jar location>
+
+oracle_cx:
+  protocol: cx_oracle
+  host: <host>
+  port: <port>
+  sid: <Oracle instance identifier>
+  user: <user_name>
+  password: <password>
+  client_library_dir: <client_library_dir>
+
+snowflake_knerrir_writer:
+  protocol: snowflake
+  account: <account name>
+  role: <snowflake role>
+  warehouse: <snowflake warehouse>
+  user: <snowflake user>
+  password: <user password>
+
+hive_test_profile:
+  protcol: jdbc
+  user: <metastore user name>
+  password: <metastore user password>
+  connection_url: <metastore jdbc connection url>
+  database: <hive database to crawl>
+  driver:
+    name: <metastore database drive class name>
+    path: <path to driver jar>
+
+
+

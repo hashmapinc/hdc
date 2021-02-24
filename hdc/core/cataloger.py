@@ -14,23 +14,42 @@
 """
 #TODO: Module description
 """
+import logging
+
+from pandas import DataFrame
 from providah.factories.package_factory import PackageFactory as providah_pkg_factory
+from tabulate import tabulate
 
 from hdc.core.catalog.crawler import Crawler
+from hdc.utils.misc import get_app_config
 
 
 class Cataloger:
-
     def __init__(self, **kwargs):
-        # Get a catalog, relevant to the type needed
+        self._logger = self._get_logger()
+
         source = kwargs.get('source')
-        self._crawler: Crawler = providah_pkg_factory.create(key=source['class_type'],
-                                                             configuration={'dao_conf': source['dao_conf']})
+        app_config = get_app_config(kwargs.get('app_config', None))
 
-    def obtain_catalog(self) -> tuple:
+        # self._logger.info(f"Creating a crawler of type {app_config['sources'][source]['class_name']}")
+        self._crawler: Crawler = providah_pkg_factory.create(key=app_config['sources'][source]['class_name'],
+                                                             configuration={'dao_conf': {
+                                                                 'class_name': app_config['sources'][source]['dao'],
+                                                                 'conn_profile_name': app_config['connection_profiles']
+                                                                 [source]
+                                                             }})
+
+    @classmethod
+    def _get_logger(cls):
+        return logging.getLogger(cls.__name__)
+
+    @staticmethod
+    def pretty_print(catalog_dataframe):
+        print(tabulate(catalog_dataframe, headers='keys', tablefmt="pretty", showindex=False))
+
+    def obtain_catalog(self) -> DataFrame:
         """
-
-
-        :return: A tuple
+        :return: A pandas Dataframe
         """
-        return self._crawler.run()
+        # self._logger.info(f"Crawling to obtain catalog")
+        return self._crawler.obtain_catalog()

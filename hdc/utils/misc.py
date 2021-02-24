@@ -11,15 +11,26 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-"""
-# TODO: Module description
-"""
 
-from hdc.core.create.creator import Creator
+from pathlib import Path
+
+from hdc.utils import file_parsers
 
 
-class RdbmsCreator(Creator):
+def get_default_app_config_path():
+    return Path.home() / '.hdc' / 'app_config.yml'
 
-    def run(self, database_sql, schema_sql, table_sql):
-        raise NotImplementedError(f'Method not implemented for {type(self).__name__}.')
 
+def get_default_log_config_path():
+    return Path.home() / '.hdc' / 'log_settings.yml'
+
+
+def get_app_config(app_config):
+    # If app_config.yml is given at the CLI
+    if app_config is not None:
+        config_dict = file_parsers.yaml_parser(app_config)
+    # Else read from the default location
+    else:
+        config_dict = file_parsers.yaml_parser(get_default_app_config_path())
+
+    return config_dict

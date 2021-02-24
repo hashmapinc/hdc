@@ -14,9 +14,16 @@
 """
 # TODO : Module description
 """
+import logging
 
 
 class Mapper:
 
-    def run(self) -> tuple:
+    def __init__(self, **kwargs):
+        self.__logger = self._get_logger()
+
+    def map_assets(self) -> tuple:
         raise NotImplementedError(f'Method not implemented for {type(self).__name__}.')
+
+    def _get_logger(self):
+        return logging.getLogger(".".join([class_type.__name__ for class_type in self.__class__.mro()[-2::-1]]))

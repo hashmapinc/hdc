@@ -15,21 +15,56 @@
 #TODO: Module description
 """
 
-import logging
+from string import Template
+
+import pandas as pd
+from providah.factories.package_factory import PackageFactory as providah_pkg_factory
 
 from hdc.core.catalog.rdbms_crawler import RdbmsCrawler
+from hdc.core.dao.rdbms_dao import RdbmsDAO
 
 
 class OracleCrawler(RdbmsCrawler):
+    __template_select_all_tables = Template("SELECT '$db' as DATABASE_NAME, "
+                                            "'$user' as SCHEMA_NAME, "
+                                            "ALL_TAB_COLUMNS.TABLE_NAME as TABLE_NAME, "
+                                            "ALL_TAB_COLUMNS.COLUMN_NAME AS COLUMN_NAME, "
+                                            "ALL_TAB_COLUMNS.DATA_TYPE AS COLUMN_TYPE, "
+                                            "CASE "
+                                            "WHEN data_precision IS NOT NULL AND NVL (data_scale, 0) > 0 "
+                                            "THEN '(' || data_precision || ',' || data_scale || ')' "
+                                            " WHEN data_precision IS NOT NULL AND NVL (data_scale, 0) = 0"
+                                            "THEN '(' || data_precision || ')'"
+                                            "END AS COLUMN_SIZE, "
+                                            "ALL_TAB_COLUMNS.NULLABLE AS NOT_NULL "
+                                            "FROM ALL_TAB_COLUMNS JOIN USER_TABLES "
+                                            "ON (ALL_TAB_COLUMNS.TABLE_NAME = USER_TABLES.TABLE_NAME "
+                                            "AND USER_TABLES.STATUS = 'VALID') ")
 
     def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self._logger = self._get_logger()
-        self.__connection_choice = kwargs.get('connection_name')
+        self.__dao_conf = kwargs.get('dao_conf')
 
-    @classmethod
-    def _get_logger(cls):
-        return logging.getLogger(cls.__name__)
+    def obtain_catalog(self) -> pd.DataFrame:
+        try:
+            dao: RdbmsDAO = providah_pkg_factory.create(key=self.__dao_conf['class_name'].capitalize(),
+                                                        configuration={
+                                                            'connection': self.__dao_conf['conn_profile_name']})
 
-    def run(self) -> tuple:
-        # TODO: Add the implementation details for Oracle Crawler
-        raise RuntimeError("This source is not yet supported")
+            # Extract the table metadata/catalog from connected Oracle source
+            oracle_database = dao.get_conn_profile_key("sid") if dao.get_conn_profile_key("sid") is not None \
+                else dao.get_conn_profile_key("service_name")
+
+            df_table_catalog: pd.DataFrame = self._fetch_all(dao,
+                                                             query_string=OracleCrawler.__template_select_all_tables.substitute(
+                                                                 db=oracle_database,
+                                                                 user=dao.get_conn_profile_key("user")
+                                                             ))
+
+            return df_table_catalog
+
+        except Exception as e:
+            raise e
+
+        return None

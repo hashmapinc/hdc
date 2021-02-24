@@ -8,6 +8,7 @@ nose2 = "*"
 prospector = "*"
 
 [packages]
+cx_Oracle = "*"
 snowflake-connector-python = "*"
 mysql-connector-python = "*"
 jaydebeapi = "*"
@@ -20,6 +21,7 @@ logitol = "*"
 gitpython = "*"
 deprecation = "*"
 azure-storage-blob = "*"
+tabulate = "*"
 
 [requires]
 python_version = "3.7"

@@ -11,11 +11,18 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+"""
+# TODO: Module description
 """
 
-"""
+import pyodbc
 
-from providah.factories.package_factory import PackageFactory as pf
 
-pf.fill_registry()
+class OdbcConnector():
+
+    def __init__(self, **kwargs):
+        self.__logger = self._get_logger(self.__class__.__name__)
+
+    @classmethod
+    def connection(cls, connection_profile):
+        return pyodbc.connect(connection_profile['connection_string'])

@@ -17,21 +17,59 @@ import snowflake.connector
 from hdc.core.dao.rdbms_dao import RdbmsDAO
 
 
-class Snowflake(RdbmsDAO):
+class SnowflakeDAO(RdbmsDAO):
 
-    def _validate_configuration(self) -> bool:
-        # TODO
-        return True
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.__logger = self._get_logger()
 
-    def __attempt_to_connect(self, conn_conf):
-        return snowflake.connector.connect(
-                    user=conn_conf['user'],
-                    password=conn_conf['password'],
-                    account=conn_conf['account'],
-                    authenticator=conn_conf['authenticator'],
-                    warehouse=conn_conf['warehouse'],
-                    database=conn_conf['database'],
-                    schema=conn_conf['schema'],
-                    role=conn_conf['role'],
-                    login_timeout=1
-                )
+    def _attempt_to_connect(self, connection_profile):
+        # Assume Snowflake connector type if protocol property not set
+        # within connection profile
+        protocol = connection_profile.get('protocol', 'snowflake').lower()
+
+        if protocol == "snowflake":
+            return SnowflakeDAO.__snowflake_connector(connection_profile)
+
+        return None
+
+    @staticmethod
+    def __snowflake_connector(connection_profile):
+
+        auth_type1_present = RdbmsDAO._validate_connection_profile(connection_profile,
+                                                                   ['account', 'role', 'warehouse', 'user', 'password'])
+
+        if not auth_type1_present[0]:
+            auth_type2_present = RdbmsDAO._validate_connection_profile(connection_profile,
+                                                                       ['account', 'role', 'warehouse', 'user',
+                                                                        'authenticator'])
+
+            if not auth_type2_present[0]:
+                raise KeyError(f'One or more of {auth_type1_present[1] + auth_type2_present[1]} keys '
+                               f'not configured in profile')
+            else:
+                kwrgs = {
+                    'account': connection_profile['account'],
+                    'role': connection_profile['role'],
+                    'warehouse': connection_profile['warehouse'],
+                    'user': connection_profile['user'],
+                    'authenticator': connection_profile['authenticator'],
+                    'login_timeout': 30
+                }
+        else:
+            kwrgs = {
+                'account': connection_profile['account'],
+                'role': connection_profile['role'],
+                'warehouse': connection_profile['warehouse'],
+                'user': connection_profile['user'],
+                'password': connection_profile['password'],
+                'login_timeout': 30
+            }
+
+        if 'database' in connection_profile:
+            kwrgs['database'] = connection_profile['database']
+
+            if 'schema' in connection_profile:
+                kwrgs['schema'] = connection_profile['schema']
+
+        return snowflake.connector.connect(**kwrgs)
