@@ -1,19 +1,27 @@
 ---
 sources:
   oracle:
-    class_name: OracleCrawler
-    dao: Oracle
+    type: OracleCrawler
+    conf:
+      name: oracle_xepdb1_jdbc
+      type: Oracle
   netezza:
-    class_name: NetezzaCrawler
-    dao: Netezza
+    type: NetezzaCrawler
+    conf:
+      name: netezza_jdbc
+      type: Netezza
   hive:
-    class_name: HiveCrawler
-    dao: Hive
+    type: HiveCrawler
+    conf:
+      name: hive_metastore_knerrir_dataproc
+      type: Hive
 
 destinations:
   snowflake:
-    class_name: SnowflakeCreator
-    dao: SnowflakeDAO
+    type: SnowflakeCreator
+    conf:
+      name: snowflake_knerrir_writer
+      type: SnowflakeDAO
 
 mappers:
   oracle:
@@ -22,10 +30,4 @@ mappers:
     snowflake: NetezzaToSnowflake
   hive:
     snowflake: HiveToSnowflake
-
-connection_profiles:
-  oracle: oracle_jdbc_with_service_name
-  netezza: netezza_jdbc
-  snowflake: snowflake_knerrir_writer
-  hive: hive_test_profile
 ...

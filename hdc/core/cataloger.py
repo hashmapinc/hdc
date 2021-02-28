@@ -32,24 +32,26 @@ class Cataloger:
         app_config = get_app_config(kwargs.get('app_config', None))
 
         # self._logger.info(f"Creating a crawler of type {app_config['sources'][source]['class_name']}")
-        self._crawler: Crawler = providah_pkg_factory.create(key=app_config['sources'][source]['class_name'],
+        self._crawler: Crawler = providah_pkg_factory.create(key=app_config['sources'][source]['type'],
                                                              configuration={'dao_conf': {
-                                                                 'class_name': app_config['sources'][source]['dao'],
-                                                                 'conn_profile_name': app_config['connection_profiles']
-                                                                 [source]
+                                                                 'class_name': app_config['sources'][source]['conf']['type'],
+                                                                 'conn_profile_name': app_config['sources'][source]['conf']['name']
                                                              }})
 
-    @classmethod
-    def _get_logger(cls):
-        return logging.getLogger(cls.__name__)
+    def _get_logger(self):
+        return logging.getLogger(self.__class__.__name__)
 
     @staticmethod
     def pretty_print(catalog_dataframe):
         print(tabulate(catalog_dataframe, headers='keys', tablefmt="pretty", showindex=False))
 
     def obtain_catalog(self) -> DataFrame:
-        """
-        :return: A pandas Dataframe
-        """
-        # self._logger.info(f"Crawling to obtain catalog")
-        return self._crawler.obtain_catalog()
+        df_catalog = None
+
+        try:
+            df_catalog = self._crawler.obtain_catalog()
+        except Exception as e:
+            self._logger.error(f"Caught exception : \n {e}")
+
+        return df_catalog
+

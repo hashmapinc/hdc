@@ -34,6 +34,12 @@ handlers:
     maxBytes: 1048576
     backupCount: 20
 loggers:
+  Cataloger:
+    level: INFO
+    handlers: [console]
+  AssetMapper:
+    level: INFO
+    handlers: [console]
   Crawler:
     level: INFO
     handlers: [console]

@@ -30,29 +30,38 @@ class RdbmsCreator(Creator):
         raise NotImplementedError(f'Method not implemented for {type(self).__name__}.')
 
     def _fetch_all(self, dao, query_string, column_map) -> pd.DataFrame:
-        with dao.get_connection() as conn:
-            if conn is not None:
-                cursor = conn.cursor()
-                cursor.execute(query_string)
-                df = cursor.fetch_pandas_all()
-                df.columns = list(column_map.keys())
-                return df
-            else:
-                return None
+        try:
+            with dao.get_connection() as conn:
+                if conn is not None:
+                    cursor = conn.cursor()
+                    cursor.execute(query_string)
+                    df = cursor.fetch_pandas_all()
+                    df.columns = list(column_map.keys())
+                    return df
+                else:
+                    return None
+        except:
+            raise
 
     def _stream_result_set(self, dao, query_string) -> pd.DataFrame:
-        with dao.get_connection() as conn:
-            if conn is not None:
-                cursor = conn.cursor()
-                cursor.execute(query_string)
-                for df in cursor.fetch_pandas_batches():
-                    yield df
-            else:
-                return None
+        try:
+            with dao.get_connection() as conn:
+                if conn is not None:
+                    cursor = conn.cursor()
+                    cursor.execute(query_string)
+                    for df in cursor.fetch_pandas_batches():
+                        yield df
+                else:
+                    return None
+        except:
+            raise
 
     def _execute_update(self, dao, query_list):
-        with dao.get_connection() as conn:
-            if conn is not None:
-                cursor = conn.cursor()
-                for sql in query_list:
-                    cursor.execute(sql)
+        try:
+            with dao.get_connection() as conn:
+                if conn is not None:
+                    cursor = conn.cursor()
+                    for sql in query_list:
+                        cursor.execute(sql)
+        except:
+            raise

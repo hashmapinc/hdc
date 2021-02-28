@@ -26,6 +26,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import warnings
 import logging.config
 from argparse import ArgumentParser
 
@@ -36,6 +37,7 @@ from hdc.core.cataloger import Cataloger
 from hdc.utils import file_parsers
 from hdc.utils.misc import get_default_log_config_path, get_app_config
 
+warnings.filterwarnings("ignore")
 
 def build_parser():
     parser = ArgumentParser(prog="hdc")
@@ -95,12 +97,13 @@ if __name__ == '__main__':
                                                                configuration={
                                                                    'source': cli_args.source,
                                                                    'app_config': cli_args.app_config})
+
             df_catalog = cataloger.obtain_catalog()
+
             if df_catalog is not None:
                 cataloger.pretty_print(df_catalog)
             else:
                 print(f"Could not catalog the source '{cli_args.source}'")
-
         else:
             print("Unsupported option for 'run'")
     else:
