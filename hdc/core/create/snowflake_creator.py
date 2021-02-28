@@ -31,6 +31,12 @@ class SnowflakeCreator(RdbmsCreator):
         self.__dao_conf = kwargs.get('dao_conf')
 
     def replicate_structures(self, sql_list):
-        dao: RdbmsDAO = providah_pkg_factory.create(key=self.__dao_conf['class_name'],
-                                                    configuration={'connection': self.__dao_conf['conn_profile_name']})
-        self._execute_update(dao, sql_list)
+        try:
+
+            dao: RdbmsDAO = providah_pkg_factory.create(key=self.__dao_conf['class_name'],
+                                                        configuration={
+                                                            'connection': self.__dao_conf['conn_profile_name']})
+            self._execute_update(dao, sql_list)
+
+        except:
+            raise

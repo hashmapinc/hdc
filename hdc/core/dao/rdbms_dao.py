@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import logging
+import os
 import time
 import traceback
 from contextlib import contextmanager
@@ -64,28 +65,23 @@ class RdbmsDAO(DAO):
         connection = None
 
         # Attempt to connect
-        while connection_attempts < self._max_attempts:
-            try:
+        try:
+            while connection_attempts < self._max_attempts:
                 connection_profile = self._read_connection_profile(self._connection)
                 connection = self._attempt_to_connect(connection_profile)
 
                 # Test if connection has been established and break
                 if self._test_connection(connection):
-                    # self._logger.info(f"Connection successfully established")
                     connection_established = True
                     break
 
                 # If not, re-attempt to connect after a brief sleep
                 timeout, connection_attempts = self._sleep_and_increment_counter(timeout, connection_attempts)
 
-            except Exception as e:
-                raise e
-                # connection_attempts, connection_established = self._manage_exception(timeout,
-                #                                                                      connection_attempts,
-                #                                                                      connection_established)
-
-        if not connection_established:
-            raise ConnectionError('Could not connect to the database; Exhausted connection attempts!')
+            if not connection_established:
+                raise ConnectionError('Could not connect to the database; Exhausted connection attempts!')
+        except:
+            raise
 
         yield connection
 
@@ -93,7 +89,8 @@ class RdbmsDAO(DAO):
 
     @staticmethod
     def _get_profile_path():
-        return Path.home() / '.hdc' / 'profile.yml'
+        hdc_home = Path(os.getenv('HDC_HOME', (Path.home() / '.hdc').absolute()))
+        return hdc_home / 'profile.yml'
 
     def _test_connection(self, connection) -> bool:
         """

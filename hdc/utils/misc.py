@@ -12,17 +12,20 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import os
 from pathlib import Path
 
 from hdc.utils import file_parsers
 
 
 def get_default_app_config_path():
-    return Path.home() / '.hdc' / 'app_config.yml'
+    hdc_home = Path(os.getenv('HDC_HOME', (Path.home() / '.hdc').absolute()))
+    return hdc_home / 'app_config.yml'
 
 
 def get_default_log_config_path():
-    return Path.home() / '.hdc' / 'log_settings.yml'
+    hdc_home = Path(os.getenv('HDC_HOME', (Path.home() / '.hdc').absolute()))
+    return hdc_home / 'log_settings.yml'
 
 
 def get_app_config(app_config):

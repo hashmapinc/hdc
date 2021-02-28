@@ -29,14 +29,18 @@ class RdbmsCrawler(Crawler):
         raise NotImplementedError(f'Method not implemented for {type(self).__name__}.')
 
     def _fetch_all(self, dao, query_string) -> DataFrame:
-        with dao.get_connection() as conn:
-            if conn is not None:
-                cursor = conn.cursor()
-                self.__logger.debug(f"Fetching data for query {query_string}")
-                cursor.execute(query_string)
-                columns = cursor.description
-                result_set = [{columns[row_index][0]: value for row_index, value in enumerate(record)} for record in
-                              cursor.fetchall()]
-                return DataFrame(result_set)
-            else:
-                return None
+        df_result_set = None
+        try:
+            with dao.get_connection() as conn:
+                if conn is not None:
+                    cursor = conn.cursor()
+                    self.__logger.debug(f"Fetching data for query {query_string}")
+                    cursor.execute(query_string)
+                    columns = cursor.description
+                    result_set = [{columns[row_index][0]: value for row_index, value in enumerate(record)} for record in
+                                  cursor.fetchall()]
+                    df_result_set = DataFrame(result_set)
+        except:
+            raise
+
+        return df_result_set

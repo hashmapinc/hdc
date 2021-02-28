@@ -58,7 +58,5 @@ class NetezzaCrawler(RdbmsCrawler):
                                                        db_name=db))
 
             return df_table_catalog
-        except Exception as e:
-            raise e
-
-        return None
+        except:
+            raise

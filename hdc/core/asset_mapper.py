@@ -14,6 +14,8 @@
 """
 #TODO: Module description
 """
+import logging
+
 from providah.factories.package_factory import PackageFactory as providah_pkg_factory
 
 from hdc.core.catalog.crawler import Crawler
@@ -25,28 +27,30 @@ from hdc.utils.misc import get_app_config
 class AssetMapper:
 
     def __init__(self, **kwargs):
+        self._logger = self._get_logger()
         source = kwargs.get('source')
         destination = kwargs.get('destination')
         app_config = get_app_config(kwargs.get('app_config', None))
 
-        self._crawler: Crawler = providah_pkg_factory.create(key=app_config['sources'][source]['class_name'],
+        self._crawler: Crawler = providah_pkg_factory.create(key=app_config['sources'][source]['type'],
                                                              configuration={'dao_conf': {
-                                                                 'class_name': app_config['sources'][source]['dao'],
-                                                                 'conn_profile_name': app_config['connection_profiles'][
-                                                                     source]
+                                                                 'class_name': app_config['sources'][source][
+                                                                     'conf']['type'],
+                                                                 'conn_profile_name': app_config['sources'][source][
+                                                                     'conf']['name']
                                                              }})
 
         self._mapper: Mapper = providah_pkg_factory.create(key=app_config['mappers'][source][destination])
 
-        self._creator: Creator = providah_pkg_factory.create(key=app_config['destinations'][destination]['class_name'],
+        self._creator: Creator = providah_pkg_factory.create(key=app_config['destinations'][destination]['type'],
                                                              configuration={'dao_conf':
                                                                  {
                                                                      'class_name':
                                                                          app_config['destinations'][destination][
-                                                                             'dao'],
+                                                                             'conf']['type'],
                                                                      'conn_profile_name':
-                                                                         app_config['connection_profiles'][
-                                                                             destination]
+                                                                         app_config['connection_profiles'][destination][
+                                                                             'conf']['name']
                                                                  }})
 
     def map_assets(self) -> bool:
@@ -58,6 +62,13 @@ class AssetMapper:
                 self._creator.replicate_structures(sql_ddl_list)
                 success = True
         except Exception as e:
-            raise e
-            success = False
+            self._logger.error(f"Caught exception : \n {e}")
+
         return success
+
+    def print_summary(self):
+        # TODO: Print a summary of assets mapped from source to destination
+        pass
+
+    def _get_logger(self):
+        return logging.getLogger(self.__class__.__name__)
