@@ -26,8 +26,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import warnings
 import logging.config
+import warnings
 from argparse import ArgumentParser
 
 from providah.factories.package_factory import PackageFactory as providah_pkg_factory
@@ -38,6 +38,7 @@ from hdc.utils import file_parsers
 from hdc.utils.misc import get_default_log_config_path, get_app_config
 
 warnings.filterwarnings("ignore")
+
 
 def build_parser():
     parser = ArgumentParser(prog="hdc")

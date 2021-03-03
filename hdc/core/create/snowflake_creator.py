@@ -15,8 +15,6 @@
 #TODO: Module description
 """
 
-import logging
-
 from providah.factories.package_factory import PackageFactory as providah_pkg_factory
 
 from hdc.core.create.rdbms_creator import RdbmsCreator

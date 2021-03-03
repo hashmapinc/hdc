@@ -34,7 +34,7 @@ class NetezzaCrawler(RdbmsCrawler):
                                             "FORMAT_TYPE as COLUMN_TYPE, "
                                             "ATTLEN as COLUMN_SIZE, "
                                             "ATTNOTNULL as NOT_NULL, "
-                                            "COLDEFAULT as DEFAULT "
+                                            "COLDEFAULT as COLUMN_DEFAULT "
                                             "FROM $db_name.._V_RELATION_COLUMN "
                                             "WHERE DATABASE <> 'SYSTEM' AND "
                                             "TYPE = 'TABLE' ORDER BY SCHEMA, NAME, ATTNUM ASC ")
@@ -52,11 +52,12 @@ class NetezzaCrawler(RdbmsCrawler):
 
             df_databases = self._fetch_all(dao, NetezzaCrawler.__select_all_databases)
 
-            for db in df_databases['DATABASE_NAME'].to_list():
-                df_table_catalog = self._fetch_all(dao,
-                                                   query_string=NetezzaCrawler.__template_select_all_tables.substitute(
-                                                       db_name=db))
+            df_table_catalog = []
+            for db in df_databases['DATABASE'].to_list():
+                df_table_catalog.extend(self._fetch_all_list(dao,
+                                                             query_string=NetezzaCrawler.__template_select_all_tables
+                                                             .substitute(db_name=db)))
 
-            return df_table_catalog
+            return pd.DataFrame(df_table_catalog)
         except:
             raise

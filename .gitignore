@@ -4,3 +4,7 @@
 env/
 *.pyc
 hdcm.log*
+/hashmap_data_cataloger.egg-info/dependency_links.txt
+/hashmap_data_cataloger.egg-info/PKG-INFO
+/hashmap_data_cataloger.egg-info/SOURCES.txt
+/hashmap_data_cataloger.egg-info/top_level.txt

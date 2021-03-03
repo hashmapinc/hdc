@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import logging
-
 import pandas as pd
 
 from hdc.core.map.mapper import Mapper
@@ -21,7 +19,7 @@ from hdc.core.map.mapper import Mapper
 
 class NetezzaToSnowflake(Mapper):
     data_type_map = {
-        "VARCHAR": "(.?(VARCHAR).?)|(.?(CHAR).?)|CHARACTER VARYING",
+        "VARCHAR": "(CHARACTER VARYING)|(.?(VARCHAR).?)|(.?(CHAR).?)",
         "TIMESTAMP_TZ": "TIME WITH TIME ZONE",
         "TIMESTAMP": "TIMESTAMP",
         "BOOLEAN": "BOOLEAN",
@@ -84,10 +82,9 @@ class NetezzaToSnowflake(Mapper):
 
         df_catalog['TARGET_COLUMN_TYPE'] = self.__map_data_types(df_catalog['COLUMN_TYPE'])
         df_catalog['TARGET_NOT_NULL'] = self.__map_null_clause(df_catalog['NOT_NULL'])
-        df_catalog['COLUMN_DESC'] = df_catalog['column_name'] \
+        df_catalog['COLUMN_DESC'] = df_catalog['COLUMN_NAME'] \
                                     + ' ' \
                                     + df_catalog['TARGET_COLUMN_TYPE'] \
-                                    + '(' + df_catalog['COLUMN_SIZE'].astype(str) + ')' \
                                     + df_catalog['TARGET_NOT_NULL']
 
         df_table_group = df_catalog[['DATABASE_NAME', 'SCHEMA_NAME', 'TABLE_NAME', 'COLUMN_DESC']].groupby(
