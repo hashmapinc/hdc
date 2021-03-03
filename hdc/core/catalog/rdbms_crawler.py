@@ -44,3 +44,20 @@ class RdbmsCrawler(Crawler):
             raise
 
         return df_result_set
+
+    def _fetch_all_list(self, dao, query_string) -> list:
+        df_result_set = None
+        try:
+            with dao.get_connection() as conn:
+                if conn is not None:
+                    cursor = conn.cursor()
+                    self.__logger.debug(f"Fetching data for query {query_string}")
+                    cursor.execute(query_string)
+                    columns = cursor.description
+                    df_result_set = [{columns[row_index][0]: value for row_index, value in enumerate(record)}
+                                     for record in cursor.fetchall()]
+
+        except:
+            raise
+
+        return df_result_set

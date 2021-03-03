@@ -36,16 +36,16 @@ handlers:
 loggers:
   Cataloger:
     level: INFO
-    handlers: [console]
+    handlers: [ console ]
   AssetMapper:
     level: INFO
-    handlers: [console]
+    handlers: [ console ]
   Crawler:
     level: INFO
-    handlers: [console]
+    handlers: [ console ]
   Creator:
     level: INFO
-    handlers: [console]
+    handlers: [ console ]
   Mapper:
     level: INFO
-    handlers: [console]
+    handlers: [ console ]

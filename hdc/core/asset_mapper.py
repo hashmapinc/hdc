@@ -49,7 +49,7 @@ class AssetMapper:
                                                                          app_config['destinations'][destination][
                                                                              'conf']['type'],
                                                                      'conn_profile_name':
-                                                                         app_config['connection_profiles'][destination][
+                                                                         app_config['destinations'][destination][
                                                                              'conf']['name']
                                                                  }})
 

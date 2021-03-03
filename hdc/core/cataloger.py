@@ -34,8 +34,10 @@ class Cataloger:
         # self._logger.info(f"Creating a crawler of type {app_config['sources'][source]['class_name']}")
         self._crawler: Crawler = providah_pkg_factory.create(key=app_config['sources'][source]['type'],
                                                              configuration={'dao_conf': {
-                                                                 'class_name': app_config['sources'][source]['conf']['type'],
-                                                                 'conn_profile_name': app_config['sources'][source]['conf']['name']
+                                                                 'class_name': app_config['sources'][source]['conf'][
+                                                                     'type'],
+                                                                 'conn_profile_name':
+                                                                     app_config['sources'][source]['conf']['name']
                                                              }})
 
     def _get_logger(self):
@@ -54,4 +56,3 @@ class Cataloger:
             self._logger.error(f"Caught exception : \n {e}")
 
         return df_catalog
-
