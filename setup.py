@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="hashmap-data-cataloger",
-    version="0.1.0.12",
+    version="0.1.0.13",
     author="Hashmap, an NTT DATA Company",
     author_email="accelerators@hashmapinc.com",
     description="Early version of library - do not use",
@@ -20,4 +20,7 @@ setuptools.setup(
         "Development Status :: 4 - Beta",
     ],
     python_requires='>=3.6',
+    entry_points={
+        'console_scripts': ['hdc=hdc.__main__:start_here']
+    }
 )

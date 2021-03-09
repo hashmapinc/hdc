@@ -33,25 +33,18 @@ class AssetMapper:
         app_config = get_app_config(kwargs.get('app_config', None))
 
         self._crawler: Crawler = providah_pkg_factory.create(key=app_config['sources'][source]['type'],
-                                                             configuration={'dao_conf': {
-                                                                 'class_name': app_config['sources'][source][
-                                                                     'conf']['type'],
-                                                                 'conn_profile_name': app_config['sources'][source][
-                                                                     'conf']['name']
-                                                             }})
+                                                             configuration={'conf': app_config['sources'][source][
+                                                                 'conf']})
 
-        self._mapper: Mapper = providah_pkg_factory.create(key=app_config['mappers'][source][destination])
+        self._mapper: Mapper = providah_pkg_factory.create(key=app_config['mappers'][source][destination]['type'],
+                                                           configuration={'conf': (app_config['mappers']
+                                                           [source]
+                                                           [destination]
+                                                           ).get('conf', None)})
 
         self._creator: Creator = providah_pkg_factory.create(key=app_config['destinations'][destination]['type'],
-                                                             configuration={'dao_conf':
-                                                                 {
-                                                                     'class_name':
-                                                                         app_config['destinations'][destination][
-                                                                             'conf']['type'],
-                                                                     'conn_profile_name':
-                                                                         app_config['destinations'][destination][
-                                                                             'conf']['name']
-                                                                 }})
+                                                             configuration={'conf': app_config['destinations'][
+                                                                 destination]['conf']})
 
     def map_assets(self) -> bool:
         success = False
@@ -59,10 +52,12 @@ class AssetMapper:
             catalog_dataframe = self._crawler.obtain_catalog()
             if catalog_dataframe is not None:
                 sql_ddl_list = self._mapper.map_assets(catalog_dataframe)
+                self._logger.debug(sql_ddl_list)
                 self._creator.replicate_structures(sql_ddl_list)
                 success = True
-        except Exception as e:
-            self._logger.error(f"Caught exception : \n {e}")
+        except Exception:
+            import traceback as tb
+            self._logger.error(f"{tb.print_exc()}")
 
         return success
 

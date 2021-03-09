@@ -40,23 +40,22 @@ class HiveCrawler(RdbmsCrawler):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.__logger = self._get_logger()
-        self.__dao_conf = kwargs.get('dao_conf')
 
     def obtain_catalog(self) -> pd.DataFrame:
         try:
-            dao: RdbmsDAO = providah_pkg_factory.create(key=self.__dao_conf['class_name'].capitalize(),
+            dao: RdbmsDAO = providah_pkg_factory.create(key=self._conf['type'].capitalize(),
                                                         configuration={
-                                                            'connection': self.__dao_conf['conn_profile_name']})
+                                                            'connection': self._conf['profile']})
 
-            df_table_catalog = self._fetch_all(dao,
-                                               query_string=HiveCrawler.__template_select_all_tables.substitute(
-                                                   schema_name='default',
-                                                   db_name=dao.get_conn_profile_key('database')))
+            df_table_catalog: pd.DataFrame = self._fetch_all(dao,
+                                                             query_string=HiveCrawler.__template_select_all_tables.substitute(
+                                                                 schema_name='default',
+                                                                 db_name=dao.get_conn_profile_key('database')))
 
-            # This had to be re-applied because the query alias doesnt seem to be working.
-            # Please do not remove below mapping.
-            df_table_catalog.columns = ['DATABASE_NAME', 'SCHEMA_NAME', 'TABLE_NAME',
-                                        'COLUMN_NAME', 'COLUMN_TYPE']
+            if not df_table_catalog.empty:
+                # This had to be re-applied because the query alias doesnt seem to be working.
+                # Please do not remove below mapping.
+                df_table_catalog.columns = ['DATABASE_NAME', 'SCHEMA_NAME', 'TABLE_NAME', 'COLUMN_NAME', 'COLUMN_TYPE']
 
             return df_table_catalog
         except Exception as e:

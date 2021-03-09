@@ -21,8 +21,9 @@ class Mapper:
 
     def __init__(self, **kwargs):
         self.__logger = self._get_logger()
+        self._conf = kwargs.get('conf')  # Shared property in Mapper hierarchy
 
-    def map_assets(self) -> tuple:
+    def map_assets(self, df_catalog) -> list:
         raise NotImplementedError(f'Method not implemented for {type(self).__name__}.')
 
     def _get_logger(self):

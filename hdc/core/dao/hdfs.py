@@ -11,20 +11,24 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-"""
-# TODO: Module description
-"""
-import logging
+from hdc.core.dao.filesystem_dao import FileSystemDAO
 
 
-class Creator:
+class Hdfs(FileSystemDAO):
 
     def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.__logger = self._get_logger()
-        self._conf = kwargs.get('conf')  # Shared property in Creator class hierarchy
 
-    def replicate_structures(self, sql_ddl_list):
-        raise NotImplementedError(f'Method not implemented for {type(self).__name__}.')
+    def get_directory_listing(self, dir_path, format) -> list:
+        try:
+            import subprocess as sp
+            import re
 
-    def _get_logger(self):
-        return logging.getLogger(".".join([class_type.__name__ for class_type in self.__class__.mro()[-2::-1]]))
+            proc1 = sp.run(['hadoop', 'fs', '-ls', '-R', dir_path], stdout=sp.PIPE)
+            file_mask = re.compile(f"{dir_path}/.*{format}")
+            return [match.group() for match in re.finditer(file_mask, proc1.stdout.decode())]
+        except:
+            raise
+
+        return None

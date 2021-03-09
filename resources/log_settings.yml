@@ -49,3 +49,6 @@ loggers:
   Mapper:
     level: INFO
     handlers: [ console ]
+  DAO:
+    level: DEBUG
+    handlers: [ console ]

@@ -23,6 +23,7 @@ class Crawler:
 
     def __init__(self, **kwargs):
         self.__logger = self._get_logger()
+        self._conf = kwargs.get("conf")  # Shared property in Crawler hierarchy
 
     def obtain_catalog(self) -> DataFrame:
         raise NotImplementedError(f'Method not implemented for {type(self).__name__}.')

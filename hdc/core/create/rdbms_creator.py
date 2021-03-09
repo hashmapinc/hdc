@@ -26,7 +26,7 @@ class RdbmsCreator(Creator):
         super().__init__(**kwargs)
         self.__logger = self._get_logger()
 
-    def replicate_structures(self, database_sql, schema_sql, table_sql):
+    def replicate_structures(self, sql_ddl_list):
         raise NotImplementedError(f'Method not implemented for {type(self).__name__}.')
 
     def _fetch_all(self, dao, query_string, column_map) -> pd.DataFrame:

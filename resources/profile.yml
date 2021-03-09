@@ -68,5 +68,8 @@ hive_test_profile:
     name: <metastore database drive class name>
     path: <path to driver jar>
 
+hdfs_test_profile:
+  protocol: hadoop
+  user: <hdfs username>
 
 

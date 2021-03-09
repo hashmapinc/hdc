@@ -1,0 +1,3 @@
+dept_id, dept_name, strength, manager
+1, hr, 100, john doe
+2, finance, 150, jane smith

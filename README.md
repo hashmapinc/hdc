@@ -56,7 +56,7 @@ as [YAML](https://yaml.org/).
 
 The hdc tool uses this YAML file to define the supported sources, destinations, and corresponding mappers in order to
 self-configure itself to enable the  'map' or 'catalog' functions. The layout of this file looks
-like [this](resources/app_config.yml).
+like [this](resources/hdc.yml).
 
 The default version comes with pre-configured sources, destinations, and mappers that can be used as is, while
 invoking '_hdc_' from CLI or through an API call (see examples below). The user would only need to update the connection
@@ -68,7 +68,7 @@ file. However, it must conform to the format linked above.
 
 To create a default YAML configuration file do the following:
 
-1. Using any text editor create a file like [this](resources/app_config.yml) and save as 'app_config.yml'
+1. Using any text editor create a file like [this](resources/hdc.yml) and save as 'app_config.yml'
 2. Create a hidden directory in the User's root with the name '.hdc'
 3. Move the 'app_config.yml' into the hidden directory created above.
 
@@ -110,9 +110,9 @@ Once the package is installed along-with its dependencies, invoke it from the co
 >  -r {catalog,map}, --run {catalog,map}
 >                        One of 'catalog' or 'map'
 >  -s SOURCE, --source SOURCE
->                        Name of any one of sources configured in app_config.yml
+>                        Name of any one of sources configured in hdc.yml
 >  -d DESTINATION, --destination DESTINATION
->                        Name of any one of destinations configured in app_config.yml
+>                        Name of any one of destinations configured in hdc.yml
 >  -c APP_CONFIG, --app_config APP_CONFIG
 >                        Path to application config (YAML) file if other than default
 >  -l LOG_SETTINGS, --log_settings LOG_SETTINGS

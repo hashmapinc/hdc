@@ -14,13 +14,15 @@
 """
 # TODO : Module description
 """
+import logging
+
 import jaydebeapi
 
 
 class JdbcConnector:
 
     def __init__(self, **kwargs):
-        self.__logger = self._get_logger(self.__class__.__name__)
+        self.__logger = self._get_logger()
 
     @classmethod
     def connection(cls, connection_profile):
@@ -31,3 +33,6 @@ class JdbcConnector:
                                       'password': connection_profile['password']
                                   },
                                   jars=connection_profile['jars'])
+
+    def _get_logger(self):
+        return logging.getLogger(self.__class__.__name__)
