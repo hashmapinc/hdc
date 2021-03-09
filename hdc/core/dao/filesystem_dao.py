@@ -11,20 +11,15 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-"""
-# TODO: Module description
-"""
-import logging
+
+from hdc.core.dao.dao import DAO
 
 
-class Creator:
+class FileSystemDAO(DAO):
 
     def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.__logger = self._get_logger()
-        self._conf = kwargs.get('conf')  # Shared property in Creator class hierarchy
 
-    def replicate_structures(self, sql_ddl_list):
+    def get_directory_listing(self, dir_path, format) -> list:
         raise NotImplementedError(f'Method not implemented for {type(self).__name__}.')
-
-    def _get_logger(self):
-        return logging.getLogger(".".join([class_type.__name__ for class_type in self.__class__.mro()[-2::-1]]))

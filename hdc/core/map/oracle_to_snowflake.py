@@ -29,7 +29,7 @@ class OracleToSnowflake(Mapper):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self._logger = self._get_logger()
+        self.__logger = self._get_logger()
 
     def map_assets(self, df_catalog: pd.DataFrame) -> list:
         unique_databases = df_catalog['DATABASE_NAME'].unique()

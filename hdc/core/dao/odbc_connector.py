@@ -14,15 +14,19 @@
 """
 # TODO: Module description
 """
+import logging
 
 import pyodbc
 
 
-class OdbcConnector():
+class OdbcConnector:
 
     def __init__(self, **kwargs):
-        self.__logger = self._get_logger(self.__class__.__name__)
+        self.__logger = self._get_logger()
 
     @classmethod
     def connection(cls, connection_profile):
         return pyodbc.connect(connection_profile['connection_string'])
+
+    def _get_logger(self):
+        return logging.getLogger(self.__class__.__name__)

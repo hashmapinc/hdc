@@ -42,13 +42,12 @@ class NetezzaCrawler(RdbmsCrawler):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.__logger = self._get_logger()
-        self.__dao_conf = kwargs.get('dao_conf')
 
     def obtain_catalog(self) -> pd.DataFrame:
         try:
-            dao: RdbmsDAO = providah_pkg_factory.create(key=self.__dao_conf['class_name'].capitalize(),
+            dao: RdbmsDAO = providah_pkg_factory.create(key=self._conf['type'].capitalize(),
                                                         configuration={
-                                                            'connection': self.__dao_conf['conn_profile_name']})
+                                                            'connection': self._conf['profile']})
 
             df_databases = self._fetch_all(dao, NetezzaCrawler.__select_all_databases)
 

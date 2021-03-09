@@ -43,14 +43,13 @@ class OracleCrawler(RdbmsCrawler):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self._logger = self._get_logger()
-        self.__dao_conf = kwargs.get('dao_conf')
+        self.__logger = self._get_logger()
 
     def obtain_catalog(self) -> pd.DataFrame:
         try:
-            dao: RdbmsDAO = providah_pkg_factory.create(key=self.__dao_conf['class_name'].capitalize(),
+            dao: RdbmsDAO = providah_pkg_factory.create(key=self._conf['type'].capitalize(),
                                                         configuration={
-                                                            'connection': self.__dao_conf['conn_profile_name']})
+                                                            'connection': self._conf['profile']})
 
             # Extract the table metadata/catalog from connected Oracle source
             oracle_database = dao.get_conn_profile_key("sid") if dao.get_conn_profile_key("sid") is not None \

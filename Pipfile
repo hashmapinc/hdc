@@ -22,6 +22,7 @@ gitpython = "*"
 deprecation = "*"
 azure-storage-blob = "*"
 tabulate = "*"
+pyyaml = "*"
 
 [requires]
 python_version = "3.7"

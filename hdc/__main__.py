@@ -46,9 +46,9 @@ def build_parser():
     parser.add_argument("-r", "--run", type=str, required=True, choices=['catalog', 'map'], help="One of 'catalog' or "
                                                                                                  "'map'")
     parser.add_argument("-s", "--source", type=str, required=True,
-                        help="Name of any one of sources configured in app_config.yml")
+                        help="Name of any one of sources configured in hdc.yml")
     parser.add_argument("-d", "--destination", type=str,
-                        help="Name of any one of destinations configured in app_config.yml")
+                        help="Name of any one of destinations configured in hdc.yml")
     parser.add_argument("-c", "--app_config", type=str,
                         help="Path to application config (YAML) file if other than default")
     parser.add_argument("-l", "--log_settings", type=str, help="Path to log settings (YAML) file if other than default")
@@ -65,8 +65,7 @@ def validate_hdc_cli_args(args):
         raise RuntimeError('No arguments provided!')
 
 
-if __name__ == '__main__':
-
+def start_here():
     hdc_parser = build_parser()
     cli_args = hdc_parser.parse_args()
 
@@ -108,5 +107,9 @@ if __name__ == '__main__':
         else:
             print("Unsupported option for 'run'")
     else:
-        print("Could not find app_config.yml; Please ensure it is available at the default location "
+        print("Could not find hdc.yml; Please ensure it is available at the default location "
               "else provide via CLI")
+
+
+if __name__ == '__main__':
+    start_here()

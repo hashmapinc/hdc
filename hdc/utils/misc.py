@@ -17,19 +17,21 @@ from pathlib import Path
 
 from hdc.utils import file_parsers
 
+hds_home = 'HDS_HOME'
+
 
 def get_default_app_config_path():
-    hdc_home = Path(os.getenv('HDC_HOME', (Path.home() / '.hdc').absolute()))
-    return hdc_home / 'app_config.yml'
+    hdc_home = Path(os.getenv(hds_home, (Path.home() / '.hdc').absolute()))
+    return hdc_home / 'hdc.yml'
 
 
 def get_default_log_config_path():
-    hdc_home = Path(os.getenv('HDC_HOME', (Path.home() / '.hdc').absolute()))
+    hdc_home = Path(os.getenv(hds_home, (Path.home() / '.hdc').absolute()))
     return hdc_home / 'log_settings.yml'
 
 
 def get_app_config(app_config):
-    # If app_config.yml is given at the CLI
+    # If hdc.yml is given at the CLI
     if app_config is not None:
         config_dict = file_parsers.yaml_parser(app_config)
     # Else read from the default location
