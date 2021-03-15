@@ -76,16 +76,19 @@ class OracleToSnowflake(Mapper):
         df_catalog['COLUMN_DESC'] = df_catalog['COLUMN_NAME'] \
                                     + ' ' \
                                     + df_catalog['TARGET_COLUMN_TYPE'] \
-                                    + df_catalog['COLUMN_SIZE'].map(
-            lambda size_desc: size_desc if size_desc is not None else "") \
                                     + ' ' \
                                     + df_catalog['TARGET_NOT_NULL']
+
+
 
         df_table_group = df_catalog[['DATABASE_NAME', 'SCHEMA_NAME', 'TABLE_NAME', 'COLUMN_DESC']].groupby(
             ['DATABASE_NAME', 'SCHEMA_NAME', 'TABLE_NAME'])
 
         for name, group in df_table_group:
             sql_ddl.append(f"CREATE OR REPLACE TABLE {'.'.join(name).upper()} "
-                           f"({','.join(list(group['COLUMN_DESC'])).upper()})")
+                           f"("
+                           f"{','.join(list(group['COLUMN_DESC'])).upper()}"
+                           f", CK_SUM VARCHAR"
+                           f")")
 
         return sql_ddl

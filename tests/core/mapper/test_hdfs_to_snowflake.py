@@ -54,7 +54,7 @@ class TestHdfsToSnowflake(TestCase):
         self.assertIsInstance(self._mapper, HdfsToSnowflake)
 
     def test_map_assets(self):
-        # Execute the method to test
+        # Set expectations
         data_dict = [
             {"PARENT": "/home/dummy/resources", "FILE ASSET": "file1.csv"},
             {"PARENT": "/home/dummy/resources", "FILE ASSET": "file2.csv"},
@@ -64,14 +64,26 @@ class TestHdfsToSnowflake(TestCase):
         resources_table_schema = self._mapper._conf['schema']['resources']
         dept_table_schema = self._mapper._conf['schema']['department']
         catalog_dataframe = DataFrame(data_dict, columns=['PARENT', 'FILE ASSET'])
+
+        expected_sql_ddl = [
+            'CREATE DATABASE IF NOT EXISTS "HDFS"',
+            'CREATE SCHEMA IF NOT EXISTS "HDFS"."DEFAULT"',
+            f"CREATE OR REPLACE TABLE HDFS.DEFAULT.RESOURCES ("
+            f"{', '.join([' '.join([field['name'], field['type']]) for field in resources_table_schema['fields']])}"
+            f", CK_SUM VARCHAR"
+            f")",
+            f"CREATE OR REPLACE TABLE HDFS.DEFAULT.DEPARTMENT ("
+            f"{', '.join([' '.join([field['name'], field['type']]) for field in dept_table_schema['fields']])}"
+            f", CK_SUM VARCHAR"
+            f")"
+        ]
+
+        # Execute the method to test
         sql_ddl_list = self._mapper.map_assets(catalog_dataframe)
 
         # Make assertions
         self.assertIsNotNone(sql_ddl_list)
-        self.assertListEqual(sql_ddl_list, ['CREATE DATABASE IF NOT EXISTS "HDFS"',
-                                            'CREATE SCHEMA IF NOT EXISTS "HDFS"."DEFAULT"',
-                                            f"CREATE OR REPLACE TABLE HDFS.DEFAULT.RESOURCES ({', '.join([' '.join([field['name'], field['type']]) for field in resources_table_schema['fields']])})",
-                                            f"CREATE OR REPLACE TABLE HDFS.DEFAULT.DEPARTMENT ({', '.join([' '.join([field['name'], field['type']]) for field in dept_table_schema['fields']])})"])
+        self.assertListEqual(sql_ddl_list, expected_sql_ddl)
 
         if TestHdfsToSnowflake.print_sample:
             from pprint import pprint
