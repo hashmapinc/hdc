@@ -69,46 +69,51 @@ def start_here():
     hdc_parser = build_parser()
     cli_args = hdc_parser.parse_args()
 
-    validate_hdc_cli_args(vars(cli_args))
+    try:
+        validate_hdc_cli_args(vars(cli_args))
 
-    app_config: dict = get_app_config(cli_args.app_config)
+        app_config: dict = get_app_config(cli_args.app_config)
 
-    if cli_args.log_settings is not None:
-        logging.config.dictConfig(file_parsers.yaml_parser(yaml_file_path=cli_args.log_settings))
-    else:
-        logging.config.dictConfig(file_parsers.yaml_parser(yaml_file_path=get_default_log_config_path()))
-
-    if app_config is not None:
-        if cli_args.run.lower() == 'map':
-            asset_mapper: AssetMapper = providah_pkg_factory.create(key='AssetMapper',
-                                                                    configuration={
-                                                                        'source': cli_args.source,
-                                                                        'destination': cli_args.destination,
-                                                                        'app_config': cli_args.app_config
-                                                                    })
-
-            if asset_mapper.map_assets():
-                print(f"Successfully mapped the source '{cli_args.source}' to destination '{cli_args.destination}'")
-            else:
-                print(f"Failed to map the source '{cli_args.source}' to destination '{cli_args.destination}'")
-
-        elif cli_args.run.lower() == 'catalog':
-            cataloger: Cataloger = providah_pkg_factory.create(key='Cataloger',
-                                                               configuration={
-                                                                   'source': cli_args.source,
-                                                                   'app_config': cli_args.app_config})
-
-            df_catalog = cataloger.obtain_catalog()
-
-            if df_catalog is not None:
-                cataloger.pretty_print(df_catalog)
-            else:
-                print(f"Could not catalog the source '{cli_args.source}'")
+        if cli_args.log_settings is not None:
+            logging.config.dictConfig(file_parsers.yaml_parser(yaml_file_path=cli_args.log_settings))
         else:
-            print("Unsupported option for 'run'")
-    else:
-        print("Could not find hdc.yml; Please ensure it is available at the default location "
-              "else provide via CLI")
+            logging.config.dictConfig(file_parsers.yaml_parser(yaml_file_path=get_default_log_config_path()))
+
+        if app_config is not None:
+            if cli_args.run.lower() == 'map':
+                asset_mapper: AssetMapper = providah_pkg_factory.create(key='AssetMapper',
+                                                                        configuration={
+                                                                            'source': cli_args.source,
+                                                                            'destination': cli_args.destination,
+                                                                            'app_config': cli_args.app_config
+                                                                        })
+
+                if asset_mapper.map_assets():
+                    print(f"Successfully mapped the source '{cli_args.source}' to destination '{cli_args.destination}'")
+                else:
+                    print(f"Failed to map the source '{cli_args.source}' to destination '{cli_args.destination}'")
+
+            elif cli_args.run.lower() == 'catalog':
+                cataloger: Cataloger = providah_pkg_factory.create(key='Cataloger',
+                                                                   configuration={
+                                                                       'source': cli_args.source,
+                                                                       'app_config': cli_args.app_config})
+
+                df_catalog = cataloger.obtain_catalog()
+
+                if df_catalog is not None:
+                    cataloger.pretty_print(df_catalog)
+                else:
+                    print(f"Could not catalog the source '{cli_args.source}'")
+            else:
+                print("Unsupported option for 'run'")
+        else:
+            print("Could not find hdc.yml; Please ensure it is available at the default location "
+                  "else provide via CLI")
+
+    except RuntimeError as re:
+        print(f"hdc: error: {re}")
+        hdc_parser.print_help()
 
 
 if __name__ == '__main__':
