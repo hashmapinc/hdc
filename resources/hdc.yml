@@ -35,16 +35,23 @@ mappers:
   oracle:
     snowflake:
       type: <Mapper type/class name>
+      conf:
+        report: False
   netezza:
     snowflake:
       type: <Mapper type/class name>
+      conf:
+        report: False
   hive:
     snowflake:
       type: <Mapper type/class name>
+      conf:
+        report: False
   hdfs:
     snowflake:
       type: <Mapper type/class name>
       conf:
+        report: False
         schema:
           <table name>: <avro schema deinition object>
 ...
