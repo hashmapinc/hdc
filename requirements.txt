@@ -13,7 +13,7 @@ chardet==3.0.4
 coverage==5.5
 cryptography==3.4.6
 cx-Oracle==8.1.0
-dataclasses==0.8
+dataclasses==0.6
 deprecation==2.1.0
 distlib==0.3.1
 dodgy==0.2.1
