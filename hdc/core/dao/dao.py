@@ -20,7 +20,7 @@ import os
 from functools import reduce
 from pathlib import Path
 
-from hdc.utils.file_parsers import yaml_parser
+from hdc.utils.file_utils import yaml_parser
 
 
 class DAO:

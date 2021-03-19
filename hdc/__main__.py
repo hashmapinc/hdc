@@ -35,8 +35,7 @@ from providah.factories.package_factory import PackageFactory as providah_pkg_fa
 
 from hdc.core.asset_mapper import AssetMapper
 from hdc.core.cataloger import Cataloger
-from hdc.utils import file_parsers
-from hdc.utils.misc import get_default_log_config_path, get_app_config
+from hdc.utils import file_utils
 
 warnings.filterwarnings("ignore")
 
@@ -75,12 +74,12 @@ def start_here():
     try:
         validate_hdc_cli_args(vars(cli_args))
 
-        app_config: dict = get_app_config(cli_args.app_config)
+        app_config: dict = file_utils.get_app_config(cli_args.app_config)
 
         if cli_args.log_settings is not None:
-            logging.config.dictConfig(file_parsers.yaml_parser(yaml_file_path=cli_args.log_settings))
+            logging.config.dictConfig(file_utils.yaml_parser(yaml_file_path=cli_args.log_settings))
         else:
-            logging.config.dictConfig(file_parsers.yaml_parser(yaml_file_path=get_default_log_config_path()))
+            logging.config.dictConfig(file_utils.yaml_parser(yaml_file_path=file_utils.get_default_log_config_path()))
 
         if app_config is not None:
             if cli_args.run.lower() == 'map':

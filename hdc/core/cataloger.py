@@ -21,7 +21,7 @@ from providah.factories.package_factory import PackageFactory as providah_pkg_fa
 from tabulate import tabulate
 
 from hdc.core.catalog.crawler import Crawler
-from hdc.utils.misc import get_app_config
+from hdc.utils import file_utils
 
 
 class Cataloger:
@@ -29,7 +29,7 @@ class Cataloger:
         self._logger = self._get_logger()
 
         source = kwargs.get('source')
-        app_config = get_app_config(kwargs.get('app_config', None))
+        app_config = file_utils.get_app_config(kwargs.get('app_config', None))
 
         # self._logger.info(f"Creating a crawler of type {app_config['sources'][source]['class_name']}")
         self._crawler: Crawler = providah_pkg_factory.create(key=app_config['sources'][source]['type'],
