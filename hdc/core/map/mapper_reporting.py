@@ -72,7 +72,7 @@ def generate_report_content(df_catalog: pd.DataFrame, na):
 
     for group_name, group_df in table_group:
         group_df['ACTION'] = group_df['TARGET DATA TYPE'].map(lambda val: 'DROPPED' if val.strip() == na else 'MAPPED')
-        report.append(mdutils.header(group_name[2], 2))
+        report.append(mdutils.header(group_name[2].title(), 2))
         report.append(mdutils.blockquote(mdutils.join_with_newline([
             f"{mdutils.bold('Source')} : {mdutils.backtics(f'{group_name[0].upper()}.{group_name[1].upper()}.{group_name[2].upper()}')} "
             f"{mdutils.emsp()}|{mdutils.emsp()} "
