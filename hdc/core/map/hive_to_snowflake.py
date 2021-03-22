@@ -93,6 +93,9 @@ class HiveToSnowflake(Mapper):
 
         df_catalog['TARGET_COLUMN_TYPE'] = self.__map_data_types(df_catalog['COLUMN_TYPE'])
 
+        from tabulate import tabulate
+        print(tabulate(df_catalog, tablefmt='github', headers='keys'))
+
         df_catalog['COLUMN_DESC'] = df_catalog['COLUMN_NAME'] + ' ' + df_catalog['TARGET_COLUMN_TYPE']
 
         df_table_group = df_catalog[
