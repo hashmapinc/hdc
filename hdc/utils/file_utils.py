@@ -22,6 +22,7 @@ import yaml
 
 hds_home = 'HDS_HOME'
 
+
 def yaml_parser(yaml_file_path):
     with open(yaml_file_path, 'r') as stream:
         config = yaml.safe_load(
@@ -31,6 +32,7 @@ def yaml_parser(yaml_file_path):
         )
 
     return config
+
 
 def get_default_app_config_path():
     hdc_home = Path(os.getenv(hds_home, (Path.home() / '.hdc').absolute()))

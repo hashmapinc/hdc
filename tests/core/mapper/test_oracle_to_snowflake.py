@@ -30,16 +30,17 @@ class TestOracleToSnowflake(TestCase):
                 "oracle":
                     {"snowflake": {
                         "type": "OracleToSnowflake",
-                        "conf" : {"report": False}
+                        "conf": {"report": False}
                     }}
             }
         }
 
-        self._mapper: Mapper = providah_pkg_factory.create(key=self._app_config['mappers']['oracle']['snowflake']['type'],
-                                                           configuration={'conf': (self._app_config['mappers']['oracle']
-                                                           ['snowflake']).get('conf', {"report": False})
-                                                                          }
-                                                           )
+        self._mapper: Mapper = providah_pkg_factory.create(
+            key=self._app_config['mappers']['oracle']['snowflake']['type'],
+            configuration={'conf': (self._app_config['mappers']['oracle']
+            ['snowflake']).get('conf', {"report": False})
+                           }
+            )
 
     def test_mapper_instantiation(self):
         self.assertIsNotNone(self._mapper)

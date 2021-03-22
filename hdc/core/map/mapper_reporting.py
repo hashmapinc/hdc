@@ -15,8 +15,8 @@
 from pathlib import Path
 from string import Template
 
-from markdown import Markdown
 import pandas as pd
+from markdown import Markdown
 
 import hdc.utils.markdown_utils as mdutils
 
@@ -68,7 +68,7 @@ def build_report_from_dataframe(df_catalog: pd.DataFrame, output_file, na='-'):
 def generate_report_content(df_catalog: pd.DataFrame, na):
     report = [mdutils.header("Table Report", 1)]
 
-    table_group = df_catalog.groupby(['DATABASE NAME','SCHEMA NAME','TABLE NAME'])
+    table_group = df_catalog.groupby(['DATABASE NAME', 'SCHEMA NAME', 'TABLE NAME'])
 
     for group_name, group_df in table_group:
         group_df['ACTION'] = group_df['TARGET DATA TYPE'].map(lambda val: 'DROPPED' if val.strip() == na else 'MAPPED')

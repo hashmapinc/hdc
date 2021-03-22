@@ -88,9 +88,8 @@ class OracleToSnowflake(Mapper):
                                     + ' ' \
                                     + df_catalog['TARGET_NOT_NULL']
 
-
-
-        df_table_group = df_catalog[['DATABASE_NAME', 'SCHEMA_NAME', 'TABLE_NAME', 'TARGET_COLUMN_TYPE', 'COLUMN_DESC']].groupby(
+        df_table_group = df_catalog[
+            ['DATABASE_NAME', 'SCHEMA_NAME', 'TABLE_NAME', 'TARGET_COLUMN_TYPE', 'COLUMN_DESC']].groupby(
             ['DATABASE_NAME', 'SCHEMA_NAME', 'TABLE_NAME'])
 
         for name, group in df_table_group:

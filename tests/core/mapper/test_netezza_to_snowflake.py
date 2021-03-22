@@ -31,15 +31,16 @@ class TestNetezzaToSnowflake(TestCase):
                     {"snowflake": {
                         "type": "NETEZZAToSnowflake",
                         "conf": {"report": False}
-                                   }}
+                    }}
             }
         }
 
-        self._mapper: Mapper = providah_pkg_factory.create(key=self._app_config['mappers']['netezza']['snowflake']['type'],
-                                                           configuration={'conf': (self._app_config['mappers']['netezza']
-                                                           ['snowflake']).get('conf', {"report": False})
-                                                                          }
-                                                           )
+        self._mapper: Mapper = providah_pkg_factory.create(
+            key=self._app_config['mappers']['netezza']['snowflake']['type'],
+            configuration={'conf': (self._app_config['mappers']['netezza']
+            ['snowflake']).get('conf', {"report": False})
+                           }
+            )
 
     def test_mapper_instantiation(self):
         self.assertIsNotNone(self._mapper)

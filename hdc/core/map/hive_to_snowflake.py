@@ -14,7 +14,6 @@
 
 import pandas as pd
 
-from hdc.core.map import mapper_reporting
 from hdc.core.map.mapper import Mapper
 
 

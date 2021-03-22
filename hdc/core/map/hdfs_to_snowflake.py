@@ -75,7 +75,8 @@ class HdfsToSnowflake(Mapper):
                 dd['TABLE_NAME'].extend([table for _ in table_schema['fields']])
                 dd['COLUMN_NAME'].extend([field['name'] for field in table_schema['fields']])
                 dd['COLUMN_TYPE'].extend([field['type'] for field in table_schema['fields']])
-                mapped_types = [HdfsToSnowflake.avro_to_snowflake_data_type_map.get(field['type'].upper(), '-') for field in table_schema['fields']]
+                mapped_types = [HdfsToSnowflake.avro_to_snowflake_data_type_map.get(field['type'].upper(), '-') for
+                                field in table_schema['fields']]
                 dd['TARGET_COLUMN_TYPE'].extend(mapped_types)
             except KeyError:
                 self.__logger.error(f"Either no schema configured for table '{table}' or configuration is incorrect")

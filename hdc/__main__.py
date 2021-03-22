@@ -97,7 +97,8 @@ def start_here():
                         print(
                             f"Successfully mapped the source '{cli_args.source}' to destination '{cli_args.destination}'")
                     else:
-                        raise RuntimeError(f"Failed to map the source '{cli_args.source}' to destination '{cli_args.destination}'")
+                        raise RuntimeError(
+                            f"Failed to map the source '{cli_args.source}' to destination '{cli_args.destination}'")
 
             elif cli_args.run.lower() == 'catalog':
                 try:

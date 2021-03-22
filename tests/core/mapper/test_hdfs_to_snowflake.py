@@ -33,8 +33,9 @@ class TestHdfsToSnowflake(TestCase):
                         "conf": {
                             "report": False,
                             "schema": {
-                                "department": {"type": "record", "name": "department", "fields": [{"name": "column1", "type": "string"},
-                                                                                                  {"name": "column2", "type": "enum"}]},
+                                "department": {"type": "record", "name": "department",
+                                               "fields": [{"name": "column1", "type": "string"},
+                                                          {"name": "column2", "type": "enum"}]},
                                 "resources": {"type": "record", "name": "resources",
                                               "fields": [{"name": "column1", "type": "string"},
                                                          {"name": "column2", "type": "string"},
