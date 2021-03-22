@@ -31,11 +31,14 @@ class TestHdfsToSnowflake(TestCase):
                     {"snowflake": {
                         "type": "HdfsToSnowflake",
                         "conf": {
+                            "report": True,
                             "schema": {
-                                "department": {"type": "record", "name": "department", "fields": [
-                                    {"name": "column1", "type": "string"}]},
-                                "resources": {"type": "record", "name": "resources", "fields": [
-                                    {"name": "column1", "type": "string"}]}
+                                "department": {"type": "record", "name": "department", "fields": [{"name": "column1", "type": "string"},
+                                                                                                  {"name": "column2", "type": "enum"}]},
+                                "resources": {"type": "record", "name": "resources",
+                                              "fields": [{"name": "column1", "type": "string"},
+                                                         {"name": "column2", "type": "string"},
+                                                         {"name": "column3", "type": "string"}]}
                             }
                         }
                     }
@@ -45,7 +48,7 @@ class TestHdfsToSnowflake(TestCase):
 
         self._mapper: Mapper = providah_pkg_factory.create(key=self._app_config['mappers']['hdfs']['snowflake']['type'],
                                                            configuration={'conf': (self._app_config['mappers']['hdfs']
-                                                           ['snowflake']).get('conf', None)
+                                                           ['snowflake']).get('conf', {"report": False})
                                                                           }
                                                            )
 
@@ -68,12 +71,12 @@ class TestHdfsToSnowflake(TestCase):
         expected_sql_ddl = [
             'CREATE DATABASE IF NOT EXISTS "HDFS"',
             'CREATE SCHEMA IF NOT EXISTS "HDFS"."DEFAULT"',
-            f"CREATE OR REPLACE TABLE HDFS.DEFAULT.RESOURCES ("
-            f"{', '.join([' '.join([field['name'], field['type']]) for field in resources_table_schema['fields']])}"
+            f"CREATE OR REPLACE TABLE HDFS.DEFAULT.DEPARTMENT ("
+            f"{', '.join(['COLUMN1 VARCHAR'])}"
             f", CK_SUM VARCHAR"
             f")",
-            f"CREATE OR REPLACE TABLE HDFS.DEFAULT.DEPARTMENT ("
-            f"{', '.join([' '.join([field['name'], field['type']]) for field in dept_table_schema['fields']])}"
+            f"CREATE OR REPLACE TABLE HDFS.DEFAULT.RESOURCES ("
+            f"{', '.join(['COLUMN1 VARCHAR', 'COLUMN2 VARCHAR', 'COLUMN3 VARCHAR'])}"
             f", CK_SUM VARCHAR"
             f")"
         ]
