@@ -55,7 +55,10 @@ class HdfsToSnowflake(Mapper):
             try:
                 table_schema = self._conf['schema'][table]
                 sql_ddl.append(f"CREATE OR REPLACE TABLE {'.'.join(['HDFS', 'DEFAULT', table]).upper()} "
-                               f"({', '.join([' '.join([field['name'], field['type']]) for field in table_schema['fields']])})")
+                               f"("
+                               f"{', '.join([' '.join([field['name'], field['type']]) for field in table_schema['fields']])}"
+                               f", CK_SUM VARCHAR"
+                               f")")
             except KeyError:
                 self.__logger.error(f"Either no schema configured for table '{table}' or configuration is incorrect")
 

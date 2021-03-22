@@ -85,6 +85,7 @@ class NetezzaToSnowflake(Mapper):
         df_catalog['COLUMN_DESC'] = df_catalog['COLUMN_NAME'] \
                                     + ' ' \
                                     + df_catalog['TARGET_COLUMN_TYPE'] \
+                                    + ' ' \
                                     + df_catalog['TARGET_NOT_NULL']
 
         df_table_group = df_catalog[['DATABASE_NAME', 'SCHEMA_NAME', 'TABLE_NAME', 'COLUMN_DESC']].groupby(
@@ -92,6 +93,9 @@ class NetezzaToSnowflake(Mapper):
 
         for name, group in df_table_group:
             sql_ddl.append(f"CREATE OR REPLACE TABLE {'.'.join(name).upper()} "
-                           f"({','.join(list(group['COLUMN_DESC'])).upper()})")
+                           f"("
+                           f"{','.join(list(group['COLUMN_DESC'])).upper()}"
+                           f", CK_SUM VARCHAR"
+                           f")")
 
         return sql_ddl

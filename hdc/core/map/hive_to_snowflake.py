@@ -82,6 +82,9 @@ class HiveToSnowflake(Mapper):
 
         for name, group in df_table_group:
             sql_ddl.append(f"CREATE OR REPLACE TABLE {'.'.join(name).upper()} "
-                           f"({','.join(list(group['COLUMN_DESC'])).upper()})")
+                           f"("
+                           f"{','.join(list(group['COLUMN_DESC'])).upper()}"
+                           f", CK_SUM VARCHAR"
+                           f")")
 
         return sql_ddl
