@@ -16,8 +16,11 @@
 """
 
 import os
+from pathlib import Path
 
 import yaml
+
+hds_home = 'HDS_HOME'
 
 
 def yaml_parser(yaml_file_path):
@@ -29,3 +32,24 @@ def yaml_parser(yaml_file_path):
         )
 
     return config
+
+
+def get_default_app_config_path():
+    hdc_home = Path(os.getenv(hds_home, (Path.home() / '.hdc').absolute()))
+    return hdc_home / 'hdc.yml'
+
+
+def get_default_log_config_path():
+    hdc_home = Path(os.getenv(hds_home, (Path.home() / '.hdc').absolute()))
+    return hdc_home / 'log_settings.yml'
+
+
+def get_app_config(app_config):
+    # If hdc.yml is given at the CLI
+    if app_config is not None:
+        config_dict = yaml_parser(app_config)
+    # Else read from the default location
+    else:
+        config_dict = yaml_parser(get_default_app_config_path())
+
+    return config_dict

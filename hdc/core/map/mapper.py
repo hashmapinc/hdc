@@ -16,6 +16,8 @@
 """
 import logging
 
+from hdc.core.map import mapper_reporting
+
 
 class Mapper:
 
@@ -28,3 +30,20 @@ class Mapper:
 
     def _get_logger(self):
         return logging.getLogger(".".join([class_type.__name__ for class_type in self.__class__.mro()[-2::-1]]))
+
+    def _build_report(self, df_catalog):
+        # Create and dump an HTML report of mapping summary at current working dir
+        # Rename columns for cleaner reporting
+        df_catalog.rename(columns={'DATABASE_NAME': 'DATABASE NAME',
+                                   'SCHEMA_NAME': 'SCHEMA NAME',
+                                   'TABLE_NAME': 'TABLE NAME',
+                                   'COLUMN_NAME': 'COLUMN NAME',
+                                   'COLUMN_TYPE': 'SOURCE DATA TYPE',
+                                   'TARGET_COLUMN_TYPE': 'TARGET DATA TYPE'}, inplace=True)
+
+        from datetime import datetime
+        output_file = f"{self.__class__.__name__}_{datetime.timestamp(datetime.now())}"
+        mapper_reporting.build_report_from_dataframe(df_catalog[['DATABASE NAME', 'SCHEMA NAME', 'TABLE NAME',
+                                                                 'COLUMN NAME', 'SOURCE DATA TYPE',
+                                                                 'TARGET DATA TYPE']],
+                                                     output_file)

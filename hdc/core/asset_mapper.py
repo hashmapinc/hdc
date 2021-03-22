@@ -21,7 +21,7 @@ from providah.factories.package_factory import PackageFactory as providah_pkg_fa
 from hdc.core.catalog.crawler import Crawler
 from hdc.core.create.creator import Creator
 from hdc.core.map.mapper import Mapper
-from hdc.utils.misc import get_app_config
+from hdc.utils import file_utils
 
 
 class AssetMapper:
@@ -30,7 +30,7 @@ class AssetMapper:
         self._logger = self._get_logger()
         source = kwargs.get('source')
         destination = kwargs.get('destination')
-        app_config = get_app_config(kwargs.get('app_config', None))
+        app_config = file_utils.get_app_config(kwargs.get('app_config', None))
 
         self._crawler: Crawler = providah_pkg_factory.create(key=app_config['sources'][source]['type'],
                                                              configuration={'conf': app_config['sources'][source][
@@ -40,7 +40,7 @@ class AssetMapper:
                                                            configuration={'conf': (app_config['mappers']
                                                            [source]
                                                            [destination]
-                                                           ).get('conf', None)})
+                                                           ).get('conf', {"report": False})})
 
         self._creator: Creator = providah_pkg_factory.create(key=app_config['destinations'][destination]['type'],
                                                              configuration={'conf': app_config['destinations'][
@@ -60,10 +60,6 @@ class AssetMapper:
             self._logger.error(f"{tb.print_exc()}")
 
         return success
-
-    def print_summary(self):
-        # TODO: Print a summary of assets mapped from source to destination
-        pass
 
     def _get_logger(self):
         return logging.getLogger(self.__class__.__name__)

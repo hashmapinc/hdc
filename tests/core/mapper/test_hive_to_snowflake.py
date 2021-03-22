@@ -28,13 +28,18 @@ class TestHiveToSnowflake(TestCase):
         self._app_config = {
             "mappers": {
                 "hive":
-                    {"snowflake": {"type": "HiveToSnowflake"}}
+                    {"snowflake": {
+                        "type": "HiveToSnowflake",
+                        "conf": {
+                            "report": False
+                        }
+                    }}
             }
         }
 
         self._mapper: Mapper = providah_pkg_factory.create(key=self._app_config['mappers']['hive']['snowflake']['type'],
                                                            configuration={'conf': (self._app_config['mappers']['hive']
-                                                           ['snowflake']).get('conf', None)
+                                                           ['snowflake']).get('conf', {"report": False})
                                                                           }
                                                            )
 
@@ -46,6 +51,7 @@ class TestHiveToSnowflake(TestCase):
         # Set expectations
         data_dict = [
             ['DB1', 'SCHM1', 'TAB1', 'C1', 'NUMERIC'],
+            ['DB1', 'SCHM1', 'TAB1', 'C2', 'ARRAY(INT)'],
             ['DB1', 'SCHM1', 'TAB2', 'C1', 'INTEGER']
         ]
 

@@ -52,6 +52,9 @@ class NetezzaToSnowflake(Mapper):
         # DDL for all tables under each unique database and schema
         sql_ddl_list.extend(self.__map_tables(df_catalog))
 
+        if self._conf.get("report", False):
+            self._build_report(df_catalog)
+
         return sql_ddl_list
 
     @staticmethod
@@ -65,11 +68,18 @@ class NetezzaToSnowflake(Mapper):
 
     @staticmethod
     def __map_data_types(src_data_type: pd.Series) -> pd.Series:
-        target_data_type = src_data_type
+        keep = "|".join(NetezzaToSnowflake.data_type_map.values())
+        discard = f"(?!{keep})"
+        supported_data_types = src_data_type.str.match(keep)
+        unsupported_data_types = src_data_type.str.match(discard)
+        target_data_type = src_data_type[supported_data_types]
         for target_type, source_type in NetezzaToSnowflake.data_type_map.items():
             target_data_type = target_data_type.str.replace(source_type, target_type, case=False)
 
-        return target_data_type
+        return pd.concat([
+            target_data_type,
+            src_data_type[unsupported_data_types].str.replace('.*', '-', regex=True)
+        ])
 
     @staticmethod
     def __map_null_clause(src_null_clause: pd.Series) -> pd.Series:
@@ -77,8 +87,6 @@ class NetezzaToSnowflake(Mapper):
 
     def __map_tables(self, df_catalog: pd.DataFrame) -> list:
         sql_ddl = []
-
-        # TODO: Filter out rows where column_type is un-supported and log
 
         df_catalog['TARGET_COLUMN_TYPE'] = self.__map_data_types(df_catalog['COLUMN_TYPE'])
         df_catalog['TARGET_NOT_NULL'] = self.__map_null_clause(df_catalog['NOT_NULL'])
@@ -88,13 +96,14 @@ class NetezzaToSnowflake(Mapper):
                                     + ' ' \
                                     + df_catalog['TARGET_NOT_NULL']
 
-        df_table_group = df_catalog[['DATABASE_NAME', 'SCHEMA_NAME', 'TABLE_NAME', 'COLUMN_DESC']].groupby(
+        df_table_group = df_catalog[
+            ['DATABASE_NAME', 'SCHEMA_NAME', 'TABLE_NAME', 'TARGET_COLUMN_TYPE', 'COLUMN_DESC']].groupby(
             ['DATABASE_NAME', 'SCHEMA_NAME', 'TABLE_NAME'])
 
         for name, group in df_table_group:
             sql_ddl.append(f"CREATE OR REPLACE TABLE {'.'.join(name).upper()} "
                            f"("
-                           f"{','.join(list(group['COLUMN_DESC'])).upper()}"
+                           f"{','.join(list(group[~group['TARGET_COLUMN_TYPE'].str.contains('-')]['COLUMN_DESC'])).upper()}"
                            f", CK_SUM VARCHAR"
                            f")")
 

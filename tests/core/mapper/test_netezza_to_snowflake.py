@@ -28,15 +28,19 @@ class TestNetezzaToSnowflake(TestCase):
         self._app_config = {
             "mappers": {
                 "netezza":
-                    {"snowflake": {"type": "NETEZZAToSnowflake"}}
+                    {"snowflake": {
+                        "type": "NETEZZAToSnowflake",
+                        "conf": {"report": False}
+                    }}
             }
         }
 
-        self._mapper: Mapper = providah_pkg_factory.create(key=self._app_config['mappers']['netezza']['snowflake']['type'],
-                                                           configuration={'conf': (self._app_config['mappers']['netezza']
-                                                           ['snowflake']).get('conf', None)
-                                                                          }
-                                                           )
+        self._mapper: Mapper = providah_pkg_factory.create(
+            key=self._app_config['mappers']['netezza']['snowflake']['type'],
+            configuration={'conf': (self._app_config['mappers']['netezza']
+            ['snowflake']).get('conf', {"report": False})
+                           }
+            )
 
     def test_mapper_instantiation(self):
         self.assertIsNotNone(self._mapper)
@@ -46,6 +50,7 @@ class TestNetezzaToSnowflake(TestCase):
         # Set expectations
         data_dict = [
             ['DB1', 'SCHM1', 'TAB1', 'C1', 'NVARCHAR', '1000', True, 'ABCD'],
+            ['DB1', 'SCHM1', 'TAB1', 'C2', 'cdcdv', '1000', True, 'ABCD'],
             ['DB1', 'SCHM1', 'TAB2', 'C1', 'TIME WITH TIME ZONE', None, False, 'DD-MM-YYYY HH:MM:SS']
         ]
 
