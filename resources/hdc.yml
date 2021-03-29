@@ -1,0 +1,57 @@
+---
+sources:
+  oracle:
+    type: <Crawler type/class name>
+    conf:
+      type: <DAO type/class name>
+      profile: <connection profile name>
+  netezza:
+    type: <Crawler type/class name>
+    conf:
+      type: <DAO type/class name>
+      profile: <connection profile name>
+  hive:
+    type: <Crawler type/class name>
+    conf:
+      type: <DAO type/class name>
+      profile: <connection profile name>
+  hdfs:
+    type: <Crawler type/class name>
+    conf:
+      type: <Crawler type/class name>
+      profile: <connection profile name>
+      dir: <hdfs dir root>
+      file_format: <any supported file formar>
+      partition_depth: <[>= 0]>
+
+destinations:
+  snowflake:
+    type: <Creator type/class name>
+    conf:
+      type: <DAO type/class name>
+      profile: <connection profile name>
+
+mappers:
+  oracle:
+    snowflake:
+      type: <Mapper type/class name>
+      conf:
+        report: False
+  netezza:
+    snowflake:
+      type: <Mapper type/class name>
+      conf:
+        report: False
+  hive:
+    snowflake:
+      type: <Mapper type/class name>
+      conf:
+        report: False
+  hdfs:
+    snowflake:
+      type: <Mapper type/class name>
+      conf:
+        report: False
+        schema:
+          <table name>: <avro schema deinition object>
+...

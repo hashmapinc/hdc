@@ -11,106 +11,65 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import time
-import traceback
-import yaml
-import snowflake.connector as connector
-from contextlib import contextmanager
 
-from hdc.core.dao.db_dao import DBDAO
-from hdc.core.utils.project_config import ProjectConfig
+import snowflake.connector
+
+from hdc.core.dao.rdbms_dao import RdbmsDAO
 
 
-class Snowflake(DBDAO):
+class SnowflakeDAO(RdbmsDAO):
 
-    def _create_engine(self):
-        super()._create_engine()
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.__logger = self._get_logger()
 
-    def _get_connection(self):
-        """
-        Obtain a context managed snowflake connection
+    def _attempt_to_connect(self, connection_profile):
+        # Assume Snowflake connector type if protocol property not set
+        # within connection profile
+        protocol = connection_profile.get('protocol', 'snowflake').lower()
 
-        Returns: Snowflake connection
+        if protocol == "snowflake":
+            return SnowflakeDAO.__snowflake_connector(connection_profile)
 
-        Raises:
-            ConnectionError: Snowflake connection could not be established
+        return None
 
-        """
-        # Check if connection is valid, and if it isn't, then attempt create it with exponential fall of up to 3 times.
-        connection_invalid = True
-        connection_attempt_count = 0
-        timeout = self._timeout
-        connection = None
+    @staticmethod
+    def __snowflake_connector(connection_profile):
 
-        with open(f"{ProjectConfig.profile_path()}", 'r') as stream:
-            conn_conf = yaml.safe_load(stream)[ProjectConfig.hdc_env()][self._connection_name]
+        auth_type1_present = RdbmsDAO._validate_connection_profile(connection_profile,
+                                                                   ['account', 'role', 'warehouse', 'user', 'password'])
 
-        while connection_attempt_count < self._max_attempts:
-            try:
-                connection = connector.connect(
-                    user=conn_conf['user'],
-                    password=conn_conf['password'],
-                    account=conn_conf['account'],
-                    authenticator=conn_conf['authenticator'],
-                    warehouse=conn_conf['warehouse'],
-                    database=conn_conf['database'],
-                    schema=conn_conf['schema'],
-                    role=conn_conf['role'],
-                    login_timeout=1
-                )
-                # If your connection is valid, then set it so and break from while loop
-                if self._test_connection(connection):
-                    connection_invalid = False
-                    break
-                # Otherwise, you must put program to sleep, wait for next time to obtain connection and carry on.
-                connection_attempt_count = self.__sleep_and_increment_counter(timeout,
-                                                                              connection_attempt_count,
-                                                                              connection_invalid)
+        if not auth_type1_present[0]:
+            auth_type2_present = RdbmsDAO._validate_connection_profile(connection_profile,
+                                                                       ['account', 'role', 'warehouse', 'user',
+                                                                        'authenticator'])
 
-            except Exception:
-                connection_attempt_count, connection_invalid = self.__manage_exception(timeout,
-                                                                                       connection_attempt_count,
-                                                                                       connection_invalid)
-
-        if connection_invalid:
-            raise ConnectionError('Unable to connection to Snowflake. Please try again.')
-
-        return connection
-
-    def _test_connection(self, connection) -> bool:
-        """
-        Validate that the connection is valid to Snowflake instance
-
-        Returns: True if connection is valid, False otherwise
-
-        """
-        if not connection:
-            return False
-
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT 1")
-            if not len(cursor.fetchone()) > 0:
-                return False
-
-            return True
-
-    def __manage_exception(self, timeout, connection_attempt_count, connection_invalid):
-        if connection_attempt_count < self._max_attempts:
-            error_message = f'While attempting to connect to Snowflake the follow error was encountered: ' \
-                            f'{traceback.format_exc()}'
-            self._logger.error(error_message)
-            connection_attempt_count = self.__sleep_and_increment_counter(timeout, connection_attempt_count, connection_invalid)
+            if not auth_type2_present[0]:
+                raise KeyError(f'One or more of {auth_type1_present[1] + auth_type2_present[1]} keys '
+                               f'not configured in profile')
+            else:
+                kwrgs = {
+                    'account': connection_profile['account'],
+                    'role': connection_profile['role'],
+                    'warehouse': connection_profile['warehouse'],
+                    'user': connection_profile['user'],
+                    'authenticator': connection_profile['authenticator'],
+                    'login_timeout': 30
+                }
         else:
-            connection_invalid = True
-        return connection_attempt_count, connection_invalid
+            kwrgs = {
+                'account': connection_profile['account'],
+                'role': connection_profile['role'],
+                'warehouse': connection_profile['warehouse'],
+                'user': connection_profile['user'],
+                'password': connection_profile['password'],
+                'login_timeout': 30
+            }
 
-    def __sleep_and_increment_counter(self, timeout, connection_attempt_count, connection_invalid):
-        connection_attempt_count += 1
-        if connection_invalid < self._max_attempts:
-            time.sleep(self._timeout)
-            timeout *= self._timeout_factor
-        return timeout, connection_attempt_count
+        if 'database' in connection_profile:
+            kwrgs['database'] = connection_profile['database']
 
-    def _validate_configuration(self) -> bool:
-        # TODO
-        return True
+            if 'schema' in connection_profile:
+                kwrgs['schema'] = connection_profile['schema']
+
+        return snowflake.connector.connect(**kwrgs)

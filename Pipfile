@@ -4,22 +4,18 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
-nose2 = "*"
-prospector = "*"
 
 [packages]
+cx_Oracle = "*"
 snowflake-connector-python = "*"
 mysql-connector-python = "*"
 jaydebeapi = "*"
 providah = "*"
 pyodbc = "*"
-google-cloud-storage = "*"
 pandas = "*"
-sqlalchemy = "*"
-logitol = "*"
-gitpython = "*"
-deprecation = "*"
-azure-storage-blob = "*"
+tabulate = "*"
+pyyaml = "*"
+markdown = "*"
 
 [requires]
 python_version = "3.7"

@@ -11,31 +11,64 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""
+# TODO: Module description
+"""
+
 import logging
-from contextlib import contextmanager
+import os
+from functools import reduce
+from pathlib import Path
+
+from hdc.utils.file_utils import yaml_parser
 
 
 class DAO:
-    @classmethod
-    def _get_logger(cls):
-        return logging.getLogger(cls.__name__)
+    hds_home = 'HDS_HOME'
 
     def __init__(self, **kwargs):
-        self._logger = self._get_logger()
-        self._connection_name = kwargs.get('connection')
-        if not self._validate_configuration():
-            raise ConnectionError(f'Missing Configuration key for {type(self).__name__}. Please check profile.yml file. '
-                                  f'The list of required keys can be found in dao/{type(self).__name__}.py in _validate_configuration method.')
+        self.__logger = self._get_logger()
+        self._connection = kwargs.get('connection')  # Shared property in DAO hierarchy
 
-    @property
-    def connection(self):
-        return self._get_connection()
+    def get_conn_profile_key(self, keys, default=None):
+        """
+        Fetch values for keys (nested or not) from the connection profile except the password key.
+        Nested keys should be '.' delimited.
 
-    def _get_connection(self):
-        raise NotImplementedError(f'Method not implemented for {type(self).__name__}.')
+        :param keys:
+        :param default:
+        :return:
+        """
+        connection_profile = self._read_connection_profile(self._connection)
+        if 'password' not in keys.split('.'):
+            return reduce(lambda d, key: d.get(key, default) if isinstance(d, dict) else default, keys.split("."),
+                          connection_profile)
+        else:
+            return default
 
-    def _test_connection(self, connection) -> bool:
-        raise NotImplementedError(f'Method not implemented for {type(self).__name__}.')
+    def _get_logger(self):
+        return logging.getLogger(".".join([class_type.__name__ for class_type in self.__class__.mro()[-2::-1]]))
 
-    def _validate_configuration(self) -> bool:
-        raise NotImplementedError(f'Method not implemented for {type(self).__name__}.')
+    @staticmethod
+    def _get_profile_path():
+        hdc_home = Path(os.getenv(DAO.hds_home, (Path.home() / '.hdc').absolute()))
+        return hdc_home / 'profile.yml'
+
+    def _read_connection_profile(self, connection_profile_name) -> dict:
+        if Path.exists(self._get_profile_path()):
+            profile_yaml = yaml_parser(yaml_file_path=self._get_profile_path())
+
+            if connection_profile_name not in profile_yaml:
+                raise KeyError(f'{connection_profile_name} not configured in profile.yml')
+            else:
+                connection_profile = profile_yaml[connection_profile_name]  # Masking the outer local variable
+        else:
+            raise FileNotFoundError(
+                f'Could not locate the profile.yml file. Please refer to the README for setup directions.')
+
+        return connection_profile
+
+    @staticmethod
+    def _validate_connection_profile(profile, required_keys):
+        return (all([key in profile.keys() for key in required_keys]),
+                [key for key in required_keys if key not in profile.keys()])

@@ -11,92 +11,80 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import time
-from contextlib import contextmanager
-import yaml
-from sqlalchemy import exc
 
-from hdc.core.dao.db_dao import DBDAO
-from hdc.core.utils.project_config import ProjectConfig
+from hdc.core.dao.jdbc_connector import JdbcConnector
+from hdc.core.dao.odbc_connector import OdbcConnector
+from hdc.core.dao.rdbms_dao import RdbmsDAO
 
 
-class Netezza(DBDAO):
+class Netezza(RdbmsDAO):
 
-    def _get_connection_config(self, config: dict) -> dict:
-        raise NotImplementedError("Base Class Method")
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.__logger = self._get_logger()
 
-    def _connect_by_connector(self, config: dict) -> None:
-        raise NotImplementedError("Base Class Method")
-
-    def _create_engine(self):
-        super()._create_engine()
-
-    def _validate_configuration(self):
-        super()._validate_configuration()
-
-    @contextmanager
-    def _get_connection(self):
+    def _attempt_to_connect(self, connection_profile):
         """
-        Obtain a context managed netezza connection
 
-        Returns: Netezza connection
-
-        Raises:
-            ConnectionError: Netezza connection could not be established
-
+        :param connection_profile:
+        :return:
         """
-        connection = None
 
-        with open(f"{ProjectConfig.profile_path()}", 'r') as stream:
-            conn_conf = yaml.safe_load(stream)[ProjectConfig.hdc_env()][self._connection_name]
+        # Assume JDBC connector type if protocol property not set
+        # within connection profile
+        protocol = connection_profile.get('protocol', 'jdbc').lower()
 
-        connection_config = self._get_connection_config(config=conn_conf)
+        if protocol == "jdbc":
+            return Netezza.__jdbc_connector(connection_profile)
+        elif protocol == "odbc":
+            return Netezza.__odbc_connector(connection_profile)
 
-        connection_invalid = True
-        connection_attempt_count = 0
+        return None
 
-        timeout = self._timeout
+    @staticmethod
+    def __odbc_connector(connection_profile):
+        base_keys_validation_output = RdbmsDAO._validate_connection_profile(connection_profile,
+                                                                            ['user', 'password', 'host', 'port',
+                                                                             'database', 'driver'])
 
-        while connection_attempt_count < self._max_attempts:
-            connection = self._connect_by_connector(connection_config)
+        if base_keys_validation_output[0]:
+            driver_keys_validation_output = RdbmsDAO._validate_connection_profile(connection_profile['driver'],
+                                                                                  ['name'])
+            if not driver_keys_validation_output[0]:
+                raise KeyError(
+                    f'One or more of {driver_keys_validation_output[1]} keys not configured in profile')
+        else:
+            raise KeyError(
+                f'One or more of {base_keys_validation_output[1]} keys not configured in profile')
 
-            # If your connection is valid, then set it so and break from while loop
-            if self._test_connection(connection):
-                connection_invalid = False
-                break
-            # Otherwise, you must put program to sleep, wait for next time to obtain connection and carry on.
+        return OdbcConnector.connection({
+            "driver": connection_profile['driver']['name'],
+            "connection_string": f"DRIVER={connection_profile['driver']['name']};SERVER={connection_profile['host']};"
+                                 f"PORT={connection_profile['port']};DATABASE={connection_profile['database']};"
+                                 f"UID={connection_profile['user']};PWD={connection_profile['password']};"
+        })
 
-            connection_attempt_count += 1
-            if connection_invalid < self._max_attempts:
-                time.sleep(timeout)
-                timeout *= self._timeout_factor
+    @staticmethod
+    def __jdbc_connector(connection_profile):
+        base_keys_validation_output = RdbmsDAO._validate_connection_profile(connection_profile,
+                                                                            ['user', 'password', 'host', 'port',
+                                                                             'database', 'driver'])
 
-        if connection_invalid:
-            raise ConnectionError('Unable to connection to Netezza. Please try again.')
+        if base_keys_validation_output[0]:
+            driver_keys_validation_output = RdbmsDAO._validate_connection_profile(connection_profile['driver'],
+                                                                                  ['name', 'path'])
+            if not driver_keys_validation_output[0]:
+                raise KeyError(
+                    f'One or more of {driver_keys_validation_output[1]} keys not configured in profile')
+        else:
+            raise KeyError(
+                f'One or more of {base_keys_validation_output[1]} keys not configured in profile')
 
-        yield connection
-        connection.close()
-
-    def _test_connection(self, connection) -> bool:
-        """
-        Validate that the connection is valid to Netezza instance
-
-        Returns: True if connection is valid, False otherwise
-
-        """
-        result = False
-        cursor = None
-
-        if connection:
-            try:
-                cursor = connection.cursor()
-                cursor.execute("SELECT 1")
-                result = len(cursor.fetchone()) > 0
-            # TODO: Why are we testing sqlalchmey errors here???
-            except exc.StatementError as e:
-                self._logger.debug("Encountered exception: %s", e)
-            finally:
-                if cursor:
-                    cursor.close()
-
-        return result
+        # If all required properties are available, get a new connection to the Netezza database
+        return JdbcConnector.connection({
+            "jclassname": connection_profile['driver']['name'],
+            "jars": connection_profile['driver']['path'],
+            "url": f"jdbc:netezza://{connection_profile['host']}:{connection_profile['port']}/{connection_profile['database']}",
+            "user": connection_profile['user'],
+            "password": connection_profile['password']
+        })
