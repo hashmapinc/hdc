@@ -12,7 +12,7 @@ with open('requirements.txt', 'r') as f:
 
 setuptools.setup(
     name="hashmap-data-cataloger",
-    version="0.2.0.3",
+    version="0.3.0.0",
     author="Hashmap, an NTT DATA Company",
     author_email="accelerators@hashmapinc.com",
     description="Early version of library - do not use",
