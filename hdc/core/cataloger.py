@@ -33,6 +33,7 @@ class Cataloger:
 
         # self._logger.info(f"Creating a crawler of type {app_config['sources'][source]['class_name']}")
         self._crawler: Crawler = providah_pkg_factory.create(key=app_config['sources'][source]['type'],
+                                                             library='hdc',
                                                              configuration={
                                                                  'conf': app_config['sources'][source]['conf']}
                                                              )

@@ -51,6 +51,7 @@ class TestHdfsCrawler(TestCase):
         }
 
         self._crawler: Crawler = providah_pkg_factory.create(key=self._app_config['sources']['hdfs']['type'],
+                                                             library='hdc',
                                                              configuration={
                                                                  'conf': self._app_config['sources']['hdfs']['conf']}
                                                              )

@@ -31,6 +31,7 @@ class SnowflakeCreator(RdbmsCreator):
         try:
 
             dao: RdbmsDAO = providah_pkg_factory.create(key=self._conf['type'].capitalize(),
+                                                        library='hdc',
                                                         configuration={
                                                             'connection': self._conf['profile']})
             self._execute_update(dao, sql_ddl_list)

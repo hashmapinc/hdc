@@ -85,6 +85,7 @@ def start_here():
             if cli_args.run.lower() == 'map':
                 try:
                     asset_mapper: AssetMapper = providah_pkg_factory.create(key='AssetMapper',
+                                                                            library='hdc',
                                                                             configuration={
                                                                                 'source': cli_args.source,
                                                                                 'destination': cli_args.destination,
@@ -103,6 +104,7 @@ def start_here():
             elif cli_args.run.lower() == 'catalog':
                 try:
                     cataloger: Cataloger = providah_pkg_factory.create(key='Cataloger',
+                                                                       library='hdc',
                                                                        configuration={
                                                                            'source': cli_args.source,
                                                                            'app_config': cli_args.app_config})
