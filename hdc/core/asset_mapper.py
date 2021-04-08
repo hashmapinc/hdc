@@ -20,6 +20,7 @@ from providah.factories.package_factory import PackageFactory as providah_pkg_fa
 
 from hdc.core.catalog.crawler import Crawler
 from hdc.core.create.creator import Creator
+from hdc.core.exceptions.hdc_error import HdcError
 from hdc.core.map.mapper import Mapper
 from hdc.utils import file_utils
 
@@ -32,19 +33,34 @@ class AssetMapper:
         destination = kwargs.get('destination')
         app_config = file_utils.get_app_config(kwargs.get('app_config', None))
 
-        self._crawler: Crawler = providah_pkg_factory.create(key=app_config['sources'][source]['type'],
-                                                             configuration={'conf': app_config['sources'][source][
-                                                                 'conf']})
+        if source in app_config['sources'].keys():
+            self._crawler: Crawler = providah_pkg_factory.create(key=app_config['sources'][source]['type'],
+                                                                 library='hdc',
+                                                                 configuration={'conf': app_config['sources'][source][
+                                                                     'conf']})
+        else:
+            raise HdcError(message=f"{source} not registered in 'sources' in {kwargs.get('app_config') or 'hdc.yml'}")
 
-        self._mapper: Mapper = providah_pkg_factory.create(key=app_config['mappers'][source][destination]['type'],
-                                                           configuration={'conf': (app_config['mappers']
-                                                           [source]
-                                                           [destination]
-                                                           ).get('conf', {"report": False})})
+        if source in app_config['mappers'].keys() and destination in app_config['mappers'][source].keys():
+            self._mapper: Mapper = providah_pkg_factory.create(key=app_config['mappers'][source][destination]['type'],
+                                                               library='hdc',
+                                                               configuration={'conf': (app_config['mappers']
+                                                               [source]
+                                                               [destination]
+                                                               ).get('conf', {"report": False})})
+        else:
+            raise HdcError(
+                message=f"{source}/{destination} not registered in 'mappers' in {kwargs.get('app_config') or 'hdc.yml'}")
 
-        self._creator: Creator = providah_pkg_factory.create(key=app_config['destinations'][destination]['type'],
-                                                             configuration={'conf': app_config['destinations'][
-                                                                 destination]['conf']})
+
+        if destination in app_config['destinations'].keys():
+            self._creator: Creator = providah_pkg_factory.create(key=app_config['destinations'][destination]['type'],
+                                                                 library='hdc',
+                                                                 configuration={'conf': app_config['destinations'][
+                                                                     destination]['conf']})
+        else:
+            raise HdcError(
+                message=f"{destination} not registered in 'destinations' in {kwargs.get('app_config') or 'hdc.yml'}")
 
     def map_assets(self) -> bool:
         success = False
@@ -57,7 +73,8 @@ class AssetMapper:
                 success = True
         except Exception:
             import traceback as tb
-            self._logger.error(f"{tb.print_exc()}")
+            self._logger.error(f"{tb.format_exc()}")
+            raise HdcError(message=f"Failed to map the source to destination", traceback=tb.format_exc())
 
         return success
 

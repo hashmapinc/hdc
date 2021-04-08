@@ -27,6 +27,7 @@ class HdfsCrawler(Crawler):
     def obtain_catalog(self) -> DataFrame:
         try:
             dao: FileSystemDAO = providah_pkg_factory.create(key=self._conf['type'].capitalize(),
+                                                             library='hdc',
                                                              configuration={'connection': self._conf['profile']})
 
             df_filesystem_catalog = self._fetch_all(dao,

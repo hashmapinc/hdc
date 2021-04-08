@@ -48,6 +48,7 @@ class TestHdfsToSnowflake(TestCase):
         }
 
         self._mapper: Mapper = providah_pkg_factory.create(key=self._app_config['mappers']['hdfs']['snowflake']['type'],
+                                                           library='hdc',
                                                            configuration={'conf': (self._app_config['mappers']['hdfs']
                                                            ['snowflake']).get('conf', {"report": False})
                                                                           }

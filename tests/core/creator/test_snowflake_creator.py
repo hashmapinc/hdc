@@ -49,6 +49,7 @@ class TestSnowflakeCreator(TestCase):
         self._sample_query = 'CREATE OR REPLACE TEMPORARY TABLE TEMP (COL1 VARCHAR)'
 
         self._creator: Creator = providah_pkg_factory.create(key=self._app_config['destinations']['snowflake']['type'],
+                                                             library='hdc',
                                                              configuration={
                                                                  'conf': self._app_config['destinations']['snowflake'][
                                                                      'conf']}

@@ -86,6 +86,7 @@ class TestOracleCrawler(TestCase):
                                       'NOT NULL')]
 
         self._crawler: Crawler = providah_pkg_factory.create(key=self._app_config['sources']['oracle']['type'],
+                                                             library='hdc',
                                                              configuration={
                                                                  'conf': self._app_config['sources']['oracle']['conf']}
                                                              )

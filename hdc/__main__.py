@@ -29,12 +29,12 @@
 import logging.config
 import warnings
 from argparse import ArgumentParser, ArgumentTypeError
-from string import Template
 
 from providah.factories.package_factory import PackageFactory as providah_pkg_factory
 
 from hdc.core.asset_mapper import AssetMapper
 from hdc.core.cataloger import Cataloger
+from hdc.core.exceptions.hdc_error import HdcError
 from hdc.utils import file_utils
 
 warnings.filterwarnings("ignore")
@@ -69,8 +69,6 @@ def start_here():
     hdc_parser = build_parser()
     cli_args = hdc_parser.parse_args()
 
-    error_message_template = Template("hdc: error: $message")
-
     try:
         validate_hdc_cli_args(vars(cli_args))
 
@@ -85,44 +83,43 @@ def start_here():
             if cli_args.run.lower() == 'map':
                 try:
                     asset_mapper: AssetMapper = providah_pkg_factory.create(key='AssetMapper',
+                                                                            library='hdc',
                                                                             configuration={
                                                                                 'source': cli_args.source,
                                                                                 'destination': cli_args.destination,
                                                                                 'app_config': cli_args.app_config
                                                                             })
-                except KeyError as ke:
-                    print(error_message_template.substitute(message=f"Unknown value '{ke}'"))
-                else:
+
                     if asset_mapper.map_assets():
                         print(
                             f"Successfully mapped the source '{cli_args.source}' to destination '{cli_args.destination}'")
-                    else:
-                        raise RuntimeError(
-                            f"Failed to map the source '{cli_args.source}' to destination '{cli_args.destination}'")
+
+                except HdcError as hde:
+                    print(hde)
 
             elif cli_args.run.lower() == 'catalog':
                 try:
                     cataloger: Cataloger = providah_pkg_factory.create(key='Cataloger',
+                                                                       library='hdc',
                                                                        configuration={
                                                                            'source': cli_args.source,
                                                                            'app_config': cli_args.app_config})
-                except KeyError as ke:
-                    print(error_message_template.substitute(message=f"Unknown value '{ke}'"))
-                else:
+
                     df_catalog = cataloger.obtain_catalog()
 
-                    if df_catalog is not None:
-                        cataloger.pretty_print(df_catalog)
-                    else:
-                        raise RuntimeError(f"Could not catalog the source '{cli_args.source}'")
+                    cataloger.pretty_print(df_catalog)
+
+                except HdcError as hde:
+                    print(hde)
         else:
-            raise RuntimeError("Could not find hdc.yml")
+            raise HdcError(message=f"Could not find file {app_config}")
 
     except ArgumentTypeError as err:
-        print(error_message_template.substitute(message=err))
         hdc_parser.print_usage()
+        raise HdcError(message=err)
+
     except RuntimeError as err:
-        print(error_message_template.substitute(message=err))
+        raise HdcError(message=err)
 
 
 if __name__ == '__main__':

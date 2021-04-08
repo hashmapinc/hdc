@@ -37,10 +37,11 @@ class TestOracleToSnowflake(TestCase):
 
         self._mapper: Mapper = providah_pkg_factory.create(
             key=self._app_config['mappers']['oracle']['snowflake']['type'],
+            library='hdc',
             configuration={'conf': (self._app_config['mappers']['oracle']
             ['snowflake']).get('conf', {"report": False})
                            }
-            )
+        )
 
     def test_mapper_instantiation(self):
         self.assertIsNotNone(self._mapper)
