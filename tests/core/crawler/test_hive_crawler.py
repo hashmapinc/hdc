@@ -62,6 +62,7 @@ class TestHiveCrawler(TestCase):
                                       'NARRATIVE', 'VARCHAR')]
 
         self._crawler: Crawler = providah_pkg_factory.create(key=self._app_config['sources']['hive']['type'],
+                                                             library='hdc',
                                                              configuration={
                                                                  'conf': self._app_config['sources']['hive']['conf']}
                                                              )

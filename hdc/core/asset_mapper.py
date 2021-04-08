@@ -33,16 +33,19 @@ class AssetMapper:
         app_config = file_utils.get_app_config(kwargs.get('app_config', None))
 
         self._crawler: Crawler = providah_pkg_factory.create(key=app_config['sources'][source]['type'],
+                                                             library='hdc',
                                                              configuration={'conf': app_config['sources'][source][
                                                                  'conf']})
 
         self._mapper: Mapper = providah_pkg_factory.create(key=app_config['mappers'][source][destination]['type'],
+                                                           library='hdc',
                                                            configuration={'conf': (app_config['mappers']
                                                            [source]
                                                            [destination]
                                                            ).get('conf', {"report": False})})
 
         self._creator: Creator = providah_pkg_factory.create(key=app_config['destinations'][destination]['type'],
+                                                             library='hdc',
                                                              configuration={'conf': app_config['destinations'][
                                                                  destination]['conf']})
 

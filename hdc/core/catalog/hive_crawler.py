@@ -44,6 +44,7 @@ class HiveCrawler(RdbmsCrawler):
     def obtain_catalog(self) -> pd.DataFrame:
         try:
             dao: RdbmsDAO = providah_pkg_factory.create(key=self._conf['type'].capitalize(),
+                                                        library='hdc',
                                                         configuration={
                                                             'connection': self._conf['profile']})
 
